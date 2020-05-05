@@ -1,10 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/gocolly/colly"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/whiteshtef/clockwork"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -31,12 +35,30 @@ func main() {
 }
 
 func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.WithFields(log.Fields{"Error": err}).Warn("Problem with loading .env file")
+	}
 	log.SetLevel(log.DebugLevel)
 }
 
 func job() {
-	getPosts()
+	db := connectDB()
+	threads := getPosts()
+	insert(db, threads)
 }
+
+func insert(db *sql.DB, threads []thread) {
+
+}
+
+var (
+	host     = "localhost"
+	port     = 5432
+	user     = os.Getenv("PG_USER")
+	password = os.Getenv("PG_PASS")
+	dbname   = os.Getenv("PG_DB")
+)
 
 func getPosts() (threads []thread) {
 	collector := colly.NewCollector(
@@ -94,6 +116,26 @@ func getPosts() (threads []thread) {
 	}
 
 	return
+}
+
+func connectDB() *sql.DB {
+	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", pgURI)
+	if err != nil {
+		log.Error("Error with opening connection with DB")
+		panic(err)
+	}
+
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		log.Error("Connection not successful")
+		panic(err)
+	}
+
+	log.Debug("Successfully connected!")
+	return db
 }
 
 func StrToInt(str string) (i int) {
