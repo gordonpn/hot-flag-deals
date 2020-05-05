@@ -265,3 +265,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/java,react,linux,macos,windows,java-web,webstorm+all,intellij+all,visualstudiocode
+*.env

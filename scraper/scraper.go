@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
-	"github.com/whiteshtef/clockwork"
 	"os"
 	"strconv"
 	"strings"
@@ -28,10 +27,10 @@ type thread struct {
 // todo set up docker container
 
 func main() {
-	//job()
-	scheduler := clockwork.NewScheduler()
-	scheduler.Schedule().Every(20).Minutes().Do(job)
-	scheduler.Run()
+	job()
+	//scheduler := clockwork.NewScheduler()
+	//scheduler.Schedule().Every(20).Minutes().Do(job)
+	//scheduler.Run()
 }
 
 func init() {
@@ -55,9 +54,9 @@ func insert(db *sql.DB, threads []thread) {
 var (
 	host     = "localhost"
 	port     = 5432
-	user     = os.Getenv("PG_USER")
-	password = os.Getenv("PG_PASS")
-	dbname   = os.Getenv("PG_DB")
+	user     = os.Getenv("POSTGRES_USER")
+	password = os.Getenv("POSTGRES_PASSWORD")
+	dbname   = os.Getenv("POSTGRES_DB")
 )
 
 func getPosts() (threads []thread) {
@@ -98,7 +97,7 @@ func getPosts() (threads []thread) {
 			tempThread.Views = views
 			tempThread.DatePosted = strings.TrimSpace(element.ChildText(dateSelector))
 
-			log.WithFields(log.Fields{"Id": tempThread.ID}).Debug("Parsing")
+			log.WithFields(log.Fields{"ID": tempThread.ID}).Debug("Parsing")
 			threads = append(threads, tempThread)
 		})
 	}
@@ -107,7 +106,7 @@ func getPosts() (threads []thread) {
 		log.WithFields(log.Fields{"URL": request.URL.String()}).Info("Visiting")
 	})
 
-	for i := 1; i <= 10; i++ {
+	for i := 1; i <= 1; i++ {
 		url := fmt.Sprintf("https://forums.redflagdeals.com/hot-deals-f9/%d", i)
 		err := collector.Visit(url)
 		if err != nil {
@@ -128,13 +127,7 @@ func connectDB() *sql.DB {
 
 	defer db.Close()
 
-	err = db.Ping()
-	if err != nil {
-		log.Error("Connection not successful")
-		panic(err)
-	}
-
-	log.Debug("Successfully connected!")
+	log.Info("Successfully connected to DB")
 	return db
 }
 
