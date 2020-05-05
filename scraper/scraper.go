@@ -19,12 +19,8 @@ type thread struct {
 	Posts      int
 	Votes      int
 	Views      int
-	DatePosted string
+	DatePosted string // Mar 25th, 2020 4:58 pm
 }
-
-// todo parse date to a type compatible with postgresql
-// todo connect to postgresql db to insert/update
-// todo set up docker container
 
 func main() {
 	job()
@@ -54,9 +50,9 @@ func insert(db *sql.DB, threads []thread) {
 var (
 	host     = "localhost"
 	port     = 5432
-	user     = os.Getenv("POSTGRES_USER")
-	password = os.Getenv("POSTGRES_PASSWORD")
-	dbname   = os.Getenv("POSTGRES_DB")
+	user     = os.Getenv("POSTGRES_NONROOT_USER")
+	password = os.Getenv("POSTGRES_NONROOT_PASSWORD")
+	dbname   = os.Getenv("POSTGRES_NONROOT_DB")
 )
 
 func getPosts() (threads []thread) {
@@ -97,7 +93,7 @@ func getPosts() (threads []thread) {
 			tempThread.Views = views
 			tempThread.DatePosted = strings.TrimSpace(element.ChildText(dateSelector))
 
-			log.WithFields(log.Fields{"ID": tempThread.ID}).Debug("Parsing")
+			log.WithFields(log.Fields{"ID": tempThread.ID, "Link": tempThread.Link, "DatePosted": tempThread.DatePosted}).Debug("Parsing")
 			threads = append(threads, tempThread)
 		})
 	}
