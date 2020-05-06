@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/whiteshtef/clockwork"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -22,7 +23,12 @@ type thread struct {
 	Votes      int
 	Views      int
 	DatePosted time.Time
+	Seen       bool
 }
+
+const (
+	HCURL = "https://hc-ping.com"
+)
 
 func main() {
 	_, present := os.LookupEnv("DEV")
@@ -44,8 +50,24 @@ func init() {
 }
 
 func job() {
+	start, err := http.Get(fmt.Sprintf("%s/%s/start", HCURL, os.Getenv("SCRAPER_HC_UUID")))
+	if err != nil {
+		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
+	}
+	if start != nil {
+		defer start.Body.Close()
+	}
+
 	threads := getPosts()
 	upsertIntoDB(threads)
+
+	finish, err := http.Get(fmt.Sprintf("%s/%s", HCURL, os.Getenv("SCRAPER_HC_UUID")))
+	if err != nil {
+		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
+	}
+	if finish != nil {
+		defer finish.Body.Close()
+	}
 }
 
 func getPosts() (threads []thread) {
@@ -88,6 +110,7 @@ func getPosts() (threads []thread) {
 			tempThread.Votes = votes
 			tempThread.Views = views
 			tempThread.DatePosted = datetime
+			tempThread.Seen = false
 
 			log.WithFields(log.Fields{
 				"ID":         tempThread.ID,
