@@ -2,6 +2,7 @@ version: '3.8'
 services:
   hotdeals_postgres:
     image: postgres
+    user: 1000:1000
     volumes:
       - ./.docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: unless-stopped

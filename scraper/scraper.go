@@ -22,6 +22,14 @@ type thread struct {
 	DatePosted string // Mar 25th, 2020 4:58 pm
 }
 
+var (
+	host     = "localhost"
+	port     = 5432
+	user     = os.Getenv("POSTGRES_NONROOT_USER")
+	password = os.Getenv("POSTGRES_NONROOT_PASSWORD")
+	dbname   = "deals"
+)
+
 func main() {
 	job()
 	//scheduler := clockwork.NewScheduler()
@@ -46,14 +54,6 @@ func job() {
 func insert(db *sql.DB, threads []thread) {
 
 }
-
-var (
-	host     = "localhost"
-	port     = 5432
-	user     = os.Getenv("POSTGRES_NONROOT_USER")
-	password = os.Getenv("POSTGRES_NONROOT_PASSWORD")
-	dbname   = "deals"
-)
 
 func getPosts() (threads []thread) {
 	collector := colly.NewCollector(
