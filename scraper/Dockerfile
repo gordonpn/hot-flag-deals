@@ -36,13 +36,13 @@ ENV \
   GOARCH=amd64 \
   GOOS=linux
 
-RUN go build -a -installsuffix cgo -o scraper .
+RUN go build -a -installsuffix cgo -o main .
 
 FROM scratch
 
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /build/scraper /app/
+COPY --from=builder /build/main /app/
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 
@@ -50,4 +50,4 @@ WORKDIR /app
 
 USER appuser
 
-CMD ["./scraper"]
+CMD ["./main"]

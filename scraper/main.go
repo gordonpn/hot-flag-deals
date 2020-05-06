@@ -7,9 +7,11 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
+	"github.com/whiteshtef/clockwork"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type thread struct {
@@ -19,22 +21,18 @@ type thread struct {
 	Posts      int
 	Votes      int
 	Views      int
-	DatePosted string // Mar 25th, 2020 4:58 pm
+	DatePosted time.Time
 }
 
-var (
-	host     = "localhost"
-	port     = 5432
-	user     = os.Getenv("POSTGRES_NONROOT_USER")
-	password = os.Getenv("POSTGRES_NONROOT_PASSWORD")
-	dbname   = "deals"
-)
-
 func main() {
-	job()
-	//scheduler := clockwork.NewScheduler()
-	//scheduler.Schedule().Every(20).Minutes().Do(job)
-	//scheduler.Run()
+	_, present := os.LookupEnv("DEV")
+	if present {
+		job()
+	} else {
+		scheduler := clockwork.NewScheduler()
+		scheduler.Schedule().Every(20).Minutes().Do(job)
+		scheduler.Run()
+	}
 }
 
 func init() {
@@ -46,13 +44,8 @@ func init() {
 }
 
 func job() {
-	db := connectDB()
 	threads := getPosts()
-	insert(db, threads)
-}
-
-func insert(db *sql.DB, threads []thread) {
-
+	upsertIntoDB(threads)
 }
 
 func getPosts() (threads []thread) {
@@ -80,6 +73,9 @@ func getPosts() (threads []thread) {
 			views := StrToInt(element.ChildText("div > div.views"))
 			title := strings.TrimSpace(element.ChildText(titleSelector))
 			title = strings.ReplaceAll(title, "\n", "")
+			datePosted := strings.TrimSpace(element.ChildText(dateSelector))
+
+			datetime := ParseDateTime(datePosted)
 
 			tempThread.ID = id
 			if len(retailer) > 0 {
@@ -91,9 +87,13 @@ func getPosts() (threads []thread) {
 			tempThread.Posts = posts
 			tempThread.Votes = votes
 			tempThread.Views = views
-			tempThread.DatePosted = strings.TrimSpace(element.ChildText(dateSelector))
+			tempThread.DatePosted = datetime
 
-			log.WithFields(log.Fields{"ID": tempThread.ID, "Link": tempThread.Link, "DatePosted": tempThread.DatePosted}).Debug("Parsing")
+			log.WithFields(log.Fields{
+				"ID":         tempThread.ID,
+				"Link":       tempThread.Link,
+				"DatePosted": tempThread.DatePosted,
+			}).Debug("Parsing")
 			threads = append(threads, tempThread)
 		})
 	}
@@ -113,18 +113,62 @@ func getPosts() (threads []thread) {
 	return
 }
 
-func connectDB() *sql.DB {
+func upsertIntoDB(threads []thread) {
+	_, present := os.LookupEnv("DEV")
+	host := "hotdeals_postgres"
+	if present {
+		host = "localhost"
+	}
+	port := 5432
+	user := os.Getenv("POSTGRES_NONROOT_USER")
+	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")
+	dbname := "deals"
+
 	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", pgURI)
 	if err != nil {
 		log.Error("Error with opening connection with DB")
 		panic(err)
 	}
-
 	defer db.Close()
 
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
 	log.Info("Successfully connected to DB")
-	return db
+}
+
+func ParseDateTime(datetime string) (parsedDateTime time.Time) {
+	loc, _ := time.LoadLocation("America/Montreal")
+	layout := "Jan 2 2006 3:04 pm"
+
+	slices := strings.Fields(datetime)
+	month := slices[0]
+	dayOrdinal := slices[1]
+	day := dayOrdinal[:len(dayOrdinal)-3]
+	year := slices[2]
+	hoursMinutes := slices[3]
+	period := slices[4]
+
+	datetimefmt := fmt.Sprintf("%s %s %s %s %s", month, day, year, hoursMinutes, period)
+	parsedDateTime, err := time.ParseInLocation(layout, datetimefmt, loc)
+
+	if err != nil {
+		log.WithFields(log.Fields{
+			"datetime":       datetime,
+			"datetimefmt":    datetimefmt,
+			"month":          month,
+			"day":            day,
+			"year":           year,
+			"hoursMinutes":   hoursMinutes,
+			"period":         period,
+			"parsedDateTime": parsedDateTime,
+		}).Debug("Parsing date and time")
+		panic(err)
+	}
+	return
 }
 
 func StrToInt(str string) (i int) {
