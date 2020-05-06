@@ -52,7 +52,7 @@ var (
 	port     = 5432
 	user     = os.Getenv("POSTGRES_NONROOT_USER")
 	password = os.Getenv("POSTGRES_NONROOT_PASSWORD")
-	dbname   = os.Getenv("POSTGRES_NONROOT_DB")
+	dbname   = "deals"
 )
 
 func getPosts() (threads []thread) {

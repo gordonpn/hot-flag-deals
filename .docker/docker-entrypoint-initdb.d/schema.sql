@@ -1,0 +1,16 @@
+\c deals;
+
+CREATE TABLE subscribers (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE threads (
+  id INTEGER PRIMARY KEY,
+  title TEXT NOT NULL,
+  link TEXT NOT NULL,
+  posts INTEGER NOT NULL,
+  votes INTEGER NOT NULL,
+  views INTEGER NOT NULL,
+  date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
