@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -13,6 +15,10 @@ type recipient struct {
 }
 type thread struct {
 }
+
+const (
+	HCURL = "https://hc-ping.com"
+)
 
 func main() {
 
@@ -27,6 +33,7 @@ func init() {
 }
 
 func job() {
+	signalHealthCheck("start")
 	/*
 			  get all threads from DB from the last month
 			  calculate both median and mean
@@ -38,6 +45,17 @@ func job() {
 			  send email
 			  set those threads as seen
 	*/
+	signalHealthCheck("")
+}
+
+func signalHealthCheck(action string) {
+	start, err := http.Get(fmt.Sprintf("%s/%s/%s", HCURL, os.Getenv("MAILER_HC_UUID"), action))
+	if err != nil {
+		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
+	}
+	if start != nil {
+		defer start.Body.Close()
+	}
 }
 
 func retrieveContent() []thread {
