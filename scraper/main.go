@@ -144,7 +144,7 @@ func upsertIntoDB(threads []thread) {
 	port := 5432
 	user := os.Getenv("POSTGRES_NONROOT_USER")
 	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")
-	dbname := "deals"
+	dbname := os.Getenv("POSTGRES_NONROOT_DB")
 
 	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", pgURI)
