@@ -50,23 +50,21 @@ func init() {
 }
 
 func job() {
-	start, err := http.Get(fmt.Sprintf("%s/%s/start", HCURL, os.Getenv("SCRAPER_HC_UUID")))
+	signalHealthCheck("start")
+
+	threads := getPosts()
+	upsertIntoDB(threads)
+
+	signalHealthCheck("")
+}
+
+func signalHealthCheck(action string) {
+	start, err := http.Get(fmt.Sprintf("%s/%s/%s", HCURL, os.Getenv("SCRAPER_HC_UUID"), action))
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
 	}
 	if start != nil {
 		defer start.Body.Close()
-	}
-
-	threads := getPosts()
-	upsertIntoDB(threads)
-
-	finish, err := http.Get(fmt.Sprintf("%s/%s", HCURL, os.Getenv("SCRAPER_HC_UUID")))
-	if err != nil {
-		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
-	}
-	if finish != nil {
-		defer finish.Body.Close()
 	}
 }
 
@@ -170,8 +168,8 @@ func upsertIntoDB(threads []thread) {
 		sqlStatement := `
 	  INSERT INTO threads (id, title, link, posts, votes, views, date_posted, seen)
 	  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	  ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views
-	`
+	  ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
+
 		_, err = db.Exec(sqlStatement, thread.ID, thread.Title, thread.Link, thread.Posts, thread.Votes, thread.Views, thread.DatePosted, thread.Seen)
 		if err != nil {
 			log.WithFields(log.Fields{"Error": err}).Error("Problem with inserting")
