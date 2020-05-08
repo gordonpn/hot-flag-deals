@@ -1,19 +1,33 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	log "github.com/sirupsen/logrus"
 )
 
 type recipient struct {
+	Name  string
+	Email string
 }
+
 type thread struct {
+	ID         int
+	Title      string
+	Link       string
+	Posts      int
+	Votes      int
+	Views      int
+	DatePosted time.Time
+	Seen       bool
 }
 
 const (
@@ -21,29 +35,21 @@ const (
 )
 
 func main() {
-
+	_ = retrieveContent()
 }
 
 func init() {
 	err := godotenv.Load()
-	if err != nil {
-		log.WithFields(log.Fields{"Error": err}).Warn()
-	}
+	warnErr(err)
 	log.SetLevel(log.DebugLevel)
 }
 
 func job() {
 	signalHealthCheck("start")
 	/*
-			  get all threads from DB from the last month
-			  calculate both median and mean
-			  if the two values are not too far apart
-		    determine skewness
-		    https://www.statisticshowto.com/pearsons-coefficient-of-skewness/
-			  use the mean, otherwise use the median
-			  filter out threads under that threshold and seen
-			  send email
-			  set those threads as seen
+		todo
+	    send email
+	    set those threads as seen
 	*/
 	signalHealthCheck("")
 }
@@ -58,8 +64,78 @@ func signalHealthCheck(action string) {
 	}
 }
 
-func retrieveContent() []thread {
+func warnErr(err error) {
+	if err != nil {
+		log.WithFields(log.Fields{"Error": err}).Warn()
+	}
+}
 
+func retrieveContent() (threads []thread) {
+	_, present := os.LookupEnv("DEV")
+	host := "hotdeals_postgres"
+	if present {
+		host = "localhost"
+	}
+	port := 5432
+	user := os.Getenv("POSTGRES_NONROOT_USER")
+	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")
+	dbname := os.Getenv("POSTGRES_NONROOT_DB")
+
+	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", pgURI)
+	if err != nil {
+		log.Error("Error with opening connection with DB")
+		panic(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info("Successfully connected to DB")
+
+	sqlStatement := `
+  SELECT *
+  FROM threads
+  WHERE date_posted > CURRENT_TIMESTAMP - INTERVAL '30 day';`
+
+	threadRows, err := db.Query(sqlStatement)
+	warnErr(err)
+
+	for threadRows.Next() {
+		tempThread := thread{}
+		err = threadRows.Scan(
+			&tempThread.ID,
+			&tempThread.Title,
+			&tempThread.Link,
+			&tempThread.Posts,
+			&tempThread.Votes,
+			&tempThread.Views,
+			&tempThread.DatePosted,
+			&tempThread.Seen,
+		)
+		warnErr(err)
+		threads = append(threads, tempThread)
+	}
+	log.WithFields(log.Fields{
+		"len(threads)": len(threads),
+		"cap(threads)": cap(threads)},
+	).Debug("Length and capacity of threads")
+	return
+}
+
+func filter(threads []thread) (filteredThreads []thread) {
+	/*
+	  todo
+	    calculate both median and mean
+	    if the two values are not too far apart
+	    determine skewness
+	    https://www.statisticshowto.com/pearsons-coefficient-of-skewness/
+	    use the mean, otherwise use the median
+	    filter out threads under that threshold and seen
+	*/
+	return
 }
 
 func sendMails(threads []thread, recipients []recipient) {

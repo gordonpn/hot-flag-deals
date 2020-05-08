@@ -110,10 +110,6 @@ func getPosts() (threads []thread) {
 			tempThread.DatePosted = datetime
 			tempThread.Seen = false
 
-			log.WithFields(log.Fields{
-				"ID":         tempThread.ID,
-				"DatePosted": tempThread.DatePosted,
-			}).Debug("Parsing")
 			threads = append(threads, tempThread)
 		})
 	}
