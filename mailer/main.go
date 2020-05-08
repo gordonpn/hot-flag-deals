@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type recipient struct {
+type subscriber struct {
 	Name  string
 	Email string
 }
@@ -28,6 +28,10 @@ type thread struct {
 	Views      int
 	DatePosted time.Time
 	Seen       bool
+}
+
+type app struct {
+	Database *sql.DB
 }
 
 const (
@@ -47,9 +51,9 @@ func init() {
 func job() {
 	signalHealthCheck("start")
 	/*
-		todo
-	    send email
-	    set those threads as seen
+			todo
+		    send email
+		    set those threads as seen
 	*/
 	signalHealthCheck("")
 }
@@ -70,7 +74,7 @@ func warnErr(err error) {
 	}
 }
 
-func retrieveContent() (threads []thread) {
+func connectDB() app {
 	_, present := os.LookupEnv("DEV")
 	host := "hotdeals_postgres"
 	if present {
@@ -94,6 +98,13 @@ func retrieveContent() (threads []thread) {
 	}
 
 	log.Info("Successfully connected to DB")
+	postgresDB := app{}
+	postgresDB.Database = db
+	return postgresDB
+}
+
+func retrieveContent() (threads []thread) {
+	db := connectDB().Database
 
 	sqlStatement := `
   SELECT *
@@ -129,16 +140,15 @@ func filter(threads []thread) (filteredThreads []thread) {
 	/*
 	  todo
 	    calculate both median and mean
-	    if the two values are not too far apart
 	    determine skewness
 	    https://www.statisticshowto.com/pearsons-coefficient-of-skewness/
-	    use the mean, otherwise use the median
+	    use the mean if skewness is close to zero, otherwise use the median
 	    filter out threads under that threshold and seen
 	*/
 	return
 }
 
-func sendMails(threads []thread, recipients []recipient) {
+func sendMails(threads []thread, subscribers []subscriber) {
 	//https://github.com/sendgrid/sendgrid-go/blob/master/examples/helpers/mail/example.go
 	from := mail.NewEmail("Example User", "contact@gordon-pn.com")
 	subject := "Sending with SendGrid is Fun"
