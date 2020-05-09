@@ -17,6 +17,7 @@ import (
 )
 
 type subscriber struct {
+	ID    int
 	Name  string
 	Email string
 }
@@ -41,8 +42,9 @@ const (
 )
 
 func main() {
-	threadsFromDB := retrieveContent()
-	_ = filter(threadsFromDB)
+	threads := retrieveContent()
+	filteredThreads := filter(threads)
+	sendNewsletter(filteredThreads)
 }
 
 func init() {
@@ -240,8 +242,9 @@ func getSubscribers() (subscribers []subscriber) {
 	for subscribersRow.Next() {
 		tempSub := subscriber{}
 		err = subscribersRow.Scan(
-			&tempSub.Name,
+			&tempSub.ID,
 			&tempSub.Email,
+			&tempSub.Name,
 		)
 		warnErr(err)
 		subscribers = append(subscribers, tempSub)
@@ -253,33 +256,57 @@ func getSubscribers() (subscribers []subscriber) {
 	return
 }
 
-func getEmailBody() {
+func getEmailBody(threads []thread) []byte {
 	m := mail.NewV3Mail()
 
 	address := "deals@gordon-pn.com"
-	name := "Hot Deals from Red Flag Deals"
+	name := "Deals by gordonpn"
 	e := mail.NewEmail(name, address)
 	m.SetFrom(e)
 
-}
+	m.SetTemplateID(os.Getenv("SENDGRID_TEMPLATE"))
 
-func sendMails(threads []thread) {
+	p := mail.NewPersonalization()
+	var tos []*mail.Email
 	subscribers := getSubscribers()
 
-	from := mail.NewEmail("Example User", "contact@gordon-pn.com")
-	subject := "Sending with SendGrid is Fun"
-	to := mail.NewEmail("Example User", "gordon.pn6@gmail.com")
-	plainTextContent := "and easy to do anywhere, even with Go"
-	htmlContent := "<strong>and easy to do anywhere, even with Go</strong>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	response, err := client.Send(message)
+	for _, subscriber := range subscribers {
+		tos = append(tos, mail.NewEmail(subscriber.Name, subscriber.Email))
+	}
+
+	p.AddTos(tos...)
+
+	dateNow := time.Now()
+	date := fmt.Sprintf("%s %d, %d", dateNow.Month(), dateNow.Day(), dateNow.Year())
+
+	p.SetDynamicTemplateData("date", date)
+
+	var dealList []map[string]string
+	var deal map[string]string
+
+	for _, v := range threads {
+		deal = make(map[string]string)
+		deal["title"] = v.Title
+		deal["link"] = v.Link
+		dealList = append(dealList, deal)
+	}
+
+	p.SetDynamicTemplateData("deals", dealList)
+
+	m.AddPersonalizations(p)
+	return mail.GetRequestBody(m)
+}
+
+func sendNewsletter(threads []thread) {
+	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
+	request.Method = "POST"
+	var Body = getEmailBody(threads)
+	request.Body = Body
+	response, err := sendgrid.API(request)
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn()
 	} else {
 		log.WithFields(log.Fields{"Status Code": response.StatusCode}).Debug()
-		log.WithFields(log.Fields{"Body": response.Body}).Debug()
-		log.WithFields(log.Fields{"Headers": response.Headers}).Debug()
 	}
 }
 
