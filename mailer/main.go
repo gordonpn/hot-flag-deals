@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -137,6 +139,58 @@ func retrieveContent() (threads []thread) {
 }
 
 func filter(threads []thread) (filteredThreads []thread) {
+	var (
+		middle         int
+		viewsMean      int
+		viewsMedian    int
+		viewsSkewness  int
+		viewsSlice     []int
+		viewsStandDev  float64
+		viewsSum       = 0
+		viewsThreshold int
+		votesMean      int
+		votesMedian    int
+		votesSkewness  int
+		votesSlice     []int
+		votesStandDev  float64
+		votesSum       = 0
+		votesThreshold int
+	)
+	for _, thread := range threads {
+		viewsSum += thread.Views
+		viewsSlice = append(viewsSlice, thread.Views)
+		votesSum += thread.Votes
+		votesSlice = append(votesSlice, thread.Votes)
+	}
+	viewsMean = viewsSum / len(threads)
+	votesMean = votesSum / len(threads)
+	if len(threads)%2 == 0 {
+		middle = len(threads) / 2
+	} else {
+		middle = (len(threads) - 1) / 2
+	}
+	sort.Ints(viewsSlice)
+	sort.Ints(votesSlice)
+	viewsMedian = viewsSlice[middle]
+	votesMedian = votesSlice[middle]
+	for i, _ := range threads {
+		viewsStandDev += math.Pow(float64(viewsSlice[i]-viewsMean), 2)
+		votesStandDev += math.Pow(float64(votesSlice[i]-votesMean), 2)
+	}
+	viewsStandDev = math.Sqrt(viewsStandDev / float64(len(viewsSlice)))
+	votesStandDev = math.Sqrt(votesStandDev / float64(len(votesSlice)))
+	viewsSkewness = ((viewsMean - viewsMedian) * 3) / round(viewsStandDev)
+	votesSkewness = ((votesMean - votesMedian) * 3) / round(votesStandDev)
+	if Abs(viewsSkewness) > 1 {
+		viewsThreshold = viewsMedian
+	} else {
+		viewsThreshold = viewsMean
+	}
+	if Abs(votesSkewness) > 1 {
+		votesThreshold = votesMedian
+	} else {
+		votesThreshold = votesMean
+	}
 	/*
 	  todo
 	    calculate both median and mean
@@ -169,4 +223,18 @@ func sendMails(threads []thread, subscribers []subscriber) {
 
 func setSeen(threads []thread) {
 
+}
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func round(val float64) int {
+	if val < 0 {
+		return int(val - 0.5)
+	}
+	return int(val + 0.5)
 }
