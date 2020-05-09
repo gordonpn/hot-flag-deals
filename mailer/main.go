@@ -64,8 +64,10 @@ func job() {
 
 	threads := retrieveThreads()
 	filteredThreads := filter(threads)
-	sendNewsletter(filteredThreads)
-	setSeen(filteredThreads)
+	if len(filteredThreads) > 0 {
+		sendNewsletter(filteredThreads)
+		setSeen(filteredThreads)
+	}
 
 	signalHealthCheck("")
 }
