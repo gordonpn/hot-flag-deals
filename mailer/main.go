@@ -231,6 +231,9 @@ func filter(threads []thread) (filteredThreads []thread) {
 			filteredThreads = append(filteredThreads, thread)
 		}
 	}
+	sort.SliceStable(filteredThreads, func(this, that int) bool {
+		return filteredThreads[this].Votes > filteredThreads[that].Votes
+	})
 	log.WithFields(log.Fields{
 		"len(filteredThreads)": len(filteredThreads),
 		"cap(filteredThreads)": cap(filteredThreads)},
