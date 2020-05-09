@@ -141,21 +141,23 @@ func retrieveContent() (threads []thread) {
 
 func filter(threads []thread) (filteredThreads []thread) {
 	var (
-		middle         int
-		viewsMean      int
-		viewsMedian    int
-		viewsSkewness  float64
-		viewsSlice     []int
-		viewsStandDev  float64
-		viewsSum       = 0
-		viewsThreshold int
-		votesMean      int
-		votesMedian    int
-		votesSkewness  float64
-		votesSlice     []int
-		votesStandDev  float64
-		votesSum       = 0
-		votesThreshold int
+		middle            int
+		viewsMean         int
+		viewsMedian       int
+		viewsSkewness     float64
+		viewsSlice        []int
+		viewsStandDev     float64
+		viewsSum          = 0
+		viewsThreshold    int
+		votesMean         int
+		votesMedian       int
+		votesSkewness     float64
+		votesSlice        []int
+		votesStandDev     float64
+		votesSum          = 0
+		votesThreshold    int
+		standDevThreshold = 0.9
+		thresholdFactor   = 1.3
 	)
 	for _, thread := range threads {
 		viewsSum += thread.Views
@@ -183,16 +185,18 @@ func filter(threads []thread) (filteredThreads []thread) {
 	votesStandDev = math.Sqrt(votesStandDev / float64(len(votesSlice)))
 	viewsSkewness = float64((viewsMean-viewsMedian)*3) / (viewsStandDev)
 	votesSkewness = float64((votesMean-votesMedian)*3) / (votesStandDev)
-	if math.Abs(viewsSkewness) >= 0.75 {
+	if math.Abs(viewsSkewness) >= standDevThreshold {
 		viewsThreshold = viewsMedian
 	} else {
 		viewsThreshold = viewsMean
 	}
-	if math.Abs(votesSkewness) >= 0.75 {
+	if math.Abs(votesSkewness) >= standDevThreshold {
 		votesThreshold = votesMedian
 	} else {
 		votesThreshold = votesMean
 	}
+	viewsThreshold = round(float64(viewsThreshold) * thresholdFactor)
+	votesThreshold = round(float64(votesThreshold) * thresholdFactor)
 	log.WithFields(log.Fields{
 		"viewsMean":              viewsMean,
 		"viewsMedian":            viewsMedian,
@@ -207,10 +211,15 @@ func filter(threads []thread) (filteredThreads []thread) {
 		"votesSkewness":          votesSkewness,
 		"votesThreshold":         votesThreshold,
 	}).Debug()
-	/*
-	  todo
-	    filter out threads under that threshold and seen
-	*/
+	for _, thread := range threads {
+		if (thread.Views >= viewsThreshold && thread.Votes >= votesThreshold) && !thread.Seen {
+			filteredThreads = append(filteredThreads, thread)
+		}
+	}
+	log.WithFields(log.Fields{
+		"len(filteredThreads)": len(filteredThreads),
+		"cap(filteredThreads)": cap(filteredThreads)},
+	).Debug("Length and capacity of filtered threads")
 	return
 }
 

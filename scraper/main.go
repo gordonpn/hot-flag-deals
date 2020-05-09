@@ -118,7 +118,7 @@ func getPosts() (threads []thread) {
 		log.WithFields(log.Fields{"URL": request.URL.String()}).Info("Visiting")
 	})
 
-	for i := 1; i <= 1; i++ {
+	for i := 1; i <= 10; i++ {
 		url := fmt.Sprintf("https://forums.redflagdeals.com/hot-deals-f9/%d", i)
 		err := collector.Visit(url)
 		if err != nil {
