@@ -14,6 +14,7 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	log "github.com/sirupsen/logrus"
+	"github.com/whiteshtef/clockwork"
 )
 
 type subscriber struct {
@@ -42,10 +43,14 @@ const (
 )
 
 func main() {
-	threads := retrieveContent()
-	filteredThreads := filter(threads)
-	sendNewsletter(filteredThreads)
-	setSeen(filteredThreads)
+	_, present := os.LookupEnv("DEV")
+	if present {
+		job()
+	} else {
+		scheduler := clockwork.NewScheduler()
+		scheduler.Schedule().Every().Day().At("10:00").Do(job)
+		scheduler.Run()
+	}
 }
 
 func init() {
@@ -56,11 +61,12 @@ func init() {
 
 func job() {
 	signalHealthCheck("start")
-	/*
-			todo
-		    send email
-		    set those threads as seen
-	*/
+
+	threads := retrieveThreads()
+	filteredThreads := filter(threads)
+	sendNewsletter(filteredThreads)
+	setSeen(filteredThreads)
+
 	signalHealthCheck("")
 }
 
@@ -109,7 +115,7 @@ func connectDB() app {
 	return postgresDB
 }
 
-func retrieveContent() (threads []thread) {
+func retrieveThreads() (threads []thread) {
 	db := connectDB().Database
 
 	sqlStatement := `
