@@ -45,6 +45,7 @@ func main() {
 	threads := retrieveContent()
 	filteredThreads := filter(threads)
 	sendNewsletter(filteredThreads)
+	setSeen(filteredThreads)
 }
 
 func init() {
@@ -311,6 +312,16 @@ func sendNewsletter(threads []thread) {
 }
 
 func setSeen(threads []thread) {
+	db := connectDB().Database
+	for _, thread := range threads {
+		sqlStatement := `
+    UPDATE threads
+    SET seen = $1
+    WHERE id = $2;`
+
+		_, err := db.Exec(sqlStatement, true, thread.ID)
+		warnErr(err)
+	}
 
 }
 
