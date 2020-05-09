@@ -41,7 +41,8 @@ const (
 )
 
 func main() {
-	_ = retrieveContent()
+	threadsFromDB := retrieveContent()
+	_ = filter(threadsFromDB)
 }
 
 func init() {
@@ -143,14 +144,14 @@ func filter(threads []thread) (filteredThreads []thread) {
 		middle         int
 		viewsMean      int
 		viewsMedian    int
-		viewsSkewness  int
+		viewsSkewness  float64
 		viewsSlice     []int
 		viewsStandDev  float64
 		viewsSum       = 0
 		viewsThreshold int
 		votesMean      int
 		votesMedian    int
-		votesSkewness  int
+		votesSkewness  float64
 		votesSlice     []int
 		votesStandDev  float64
 		votesSum       = 0
@@ -173,30 +174,41 @@ func filter(threads []thread) (filteredThreads []thread) {
 	sort.Ints(votesSlice)
 	viewsMedian = viewsSlice[middle]
 	votesMedian = votesSlice[middle]
-	for i, _ := range threads {
+
+	for i := range threads {
 		viewsStandDev += math.Pow(float64(viewsSlice[i]-viewsMean), 2)
 		votesStandDev += math.Pow(float64(votesSlice[i]-votesMean), 2)
 	}
 	viewsStandDev = math.Sqrt(viewsStandDev / float64(len(viewsSlice)))
 	votesStandDev = math.Sqrt(votesStandDev / float64(len(votesSlice)))
-	viewsSkewness = ((viewsMean - viewsMedian) * 3) / round(viewsStandDev)
-	votesSkewness = ((votesMean - votesMedian) * 3) / round(votesStandDev)
-	if Abs(viewsSkewness) > 1 {
+	viewsSkewness = float64((viewsMean-viewsMedian)*3) / (viewsStandDev)
+	votesSkewness = float64((votesMean-votesMedian)*3) / (votesStandDev)
+	if math.Abs(viewsSkewness) >= 0.75 {
 		viewsThreshold = viewsMedian
 	} else {
 		viewsThreshold = viewsMean
 	}
-	if Abs(votesSkewness) > 1 {
+	if math.Abs(votesSkewness) >= 0.75 {
 		votesThreshold = votesMedian
 	} else {
 		votesThreshold = votesMean
 	}
+	log.WithFields(log.Fields{
+		"viewsMean":              viewsMean,
+		"viewsMedian":            viewsMedian,
+		"viewsStandardDeviation": viewsStandDev,
+		"viewsSkewness":          viewsSkewness,
+		"viewsThreshold":         viewsThreshold,
+	}).Debug()
+	log.WithFields(log.Fields{
+		"votesMean":              votesMean,
+		"votesMedian":            votesMedian,
+		"votesStandardDeviation": votesStandDev,
+		"votesSkewness":          votesSkewness,
+		"votesThreshold":         votesThreshold,
+	}).Debug()
 	/*
 	  todo
-	    calculate both median and mean
-	    determine skewness
-	    https://www.statisticshowto.com/pearsons-coefficient-of-skewness/
-	    use the mean if skewness is close to zero, otherwise use the median
 	    filter out threads under that threshold and seen
 	*/
 	return
