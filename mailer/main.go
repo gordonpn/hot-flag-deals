@@ -139,7 +139,7 @@ func retrieveContent() (threads []thread) {
 	return
 }
 
-func filter(threads []thread) (filteredThreads []thread) {
+func getThresholds(threads []thread) (viewsThreshold, votesThreshold int) {
 	var (
 		middle            int
 		viewsMean         int
@@ -148,14 +148,12 @@ func filter(threads []thread) (filteredThreads []thread) {
 		viewsSlice        []int
 		viewsStandDev     float64
 		viewsSum          = 0
-		viewsThreshold    int
 		votesMean         int
 		votesMedian       int
 		votesSkewness     float64
 		votesSlice        []int
 		votesStandDev     float64
 		votesSum          = 0
-		votesThreshold    int
 		standDevThreshold = 0.9
 		thresholdFactor   = 1.3
 	)
@@ -211,6 +209,12 @@ func filter(threads []thread) (filteredThreads []thread) {
 		"votesSkewness":          votesSkewness,
 		"votesThreshold":         votesThreshold,
 	}).Debug()
+	return
+}
+
+func filter(threads []thread) (filteredThreads []thread) {
+	viewsThreshold, votesThreshold := getThresholds(threads)
+
 	for _, thread := range threads {
 		if (thread.Views >= viewsThreshold && thread.Votes >= votesThreshold) && !thread.Seen {
 			filteredThreads = append(filteredThreads, thread)
@@ -223,8 +227,45 @@ func filter(threads []thread) (filteredThreads []thread) {
 	return
 }
 
-func sendMails(threads []thread, subscribers []subscriber) {
-	//https://github.com/sendgrid/sendgrid-go/blob/master/examples/helpers/mail/example.go
+func getSubscribers() (subscribers []subscriber) {
+	db := connectDB().Database
+
+	sqlStatement := `
+  SELECT *
+  FROM subscribers;`
+
+	subscribersRow, err := db.Query(sqlStatement)
+	warnErr(err)
+
+	for subscribersRow.Next() {
+		tempSub := subscriber{}
+		err = subscribersRow.Scan(
+			&tempSub.Name,
+			&tempSub.Email,
+		)
+		warnErr(err)
+		subscribers = append(subscribers, tempSub)
+	}
+	log.WithFields(log.Fields{
+		"len(subscribers)": len(subscribers),
+		"cap(subscribers)": cap(subscribers)},
+	).Debug("Length and capacity of subscribers")
+	return
+}
+
+func getEmailBody() {
+	m := mail.NewV3Mail()
+
+	address := "deals@gordon-pn.com"
+	name := "Hot Deals from Red Flag Deals"
+	e := mail.NewEmail(name, address)
+	m.SetFrom(e)
+
+}
+
+func sendMails(threads []thread) {
+	subscribers := getSubscribers()
+
 	from := mail.NewEmail("Example User", "contact@gordon-pn.com")
 	subject := "Sending with SendGrid is Fun"
 	to := mail.NewEmail("Example User", "gordon.pn6@gmail.com")
@@ -244,13 +285,6 @@ func sendMails(threads []thread, subscribers []subscriber) {
 
 func setSeen(threads []thread) {
 
-}
-
-func Abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
 }
 
 func round(val float64) int {
