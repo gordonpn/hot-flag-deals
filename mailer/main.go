@@ -89,11 +89,7 @@ func warnErr(err error) {
 }
 
 func connectDB() app {
-	_, present := os.LookupEnv("DEV")
 	host := "hotdeals_postgres"
-	if present {
-		host = "localhost"
-	}
 	port := 5432
 	user := os.Getenv("POSTGRES_NONROOT_USER")
 	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")
