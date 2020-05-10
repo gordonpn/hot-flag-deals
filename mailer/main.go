@@ -48,7 +48,7 @@ func main() {
 		job()
 	} else {
 		scheduler := clockwork.NewScheduler()
-		scheduler.Schedule().Every().Day().At("10:00").Do(job)
+		scheduler.Schedule().Every(1).Days().At("10:00").Do(job)
 		scheduler.Run()
 	}
 }
@@ -65,8 +65,10 @@ func job() {
 	threads := retrieveThreads()
 	filteredThreads := filter(threads)
 	if len(filteredThreads) > 0 {
-		sendNewsletter(filteredThreads)
-		setSeen(filteredThreads)
+		err := sendNewsletter(filteredThreads)
+		if err != nil {
+			setSeen(filteredThreads)
+		}
 	}
 
 	signalHealthCheck("")
@@ -325,7 +327,7 @@ func getEmailBody(threads []thread) []byte {
 	return mail.GetRequestBody(m)
 }
 
-func sendNewsletter(threads []thread) {
+func sendNewsletter(threads []thread) error {
 	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	var Body = getEmailBody(threads)
@@ -335,7 +337,9 @@ func sendNewsletter(threads []thread) {
 		log.WithFields(log.Fields{"Error": err}).Warn()
 	} else {
 		log.WithFields(log.Fields{"Status Code": response.StatusCode}).Debug()
+		log.WithFields(log.Fields{"Body": response.Body}).Debug()
 	}
+	return err
 }
 
 func setSeen(threads []thread) {
