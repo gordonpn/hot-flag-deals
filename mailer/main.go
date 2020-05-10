@@ -48,7 +48,7 @@ func main() {
 		job()
 	} else {
 		scheduler := clockwork.NewScheduler()
-		scheduler.Schedule().Every(1).Days().At("10:00").Do(job)
+		scheduler.Schedule().Every(24).Hours().Do(job)
 		scheduler.Run()
 	}
 }

@@ -3,9 +3,7 @@ services:
   hotdeals_postgres:
     container_name: hotdeals_postgres
     volumes:
-      - postgres-hotdeals:/var/lib/postgresql/data
-    expose:
-      - 5432
+      - postgres-hotdeals:/var/lib/postgresql/data/
     restart: unless-stopped
 
   hotdeals_scraper:
