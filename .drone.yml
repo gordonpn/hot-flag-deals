@@ -39,7 +39,7 @@ steps:
     commands:
       - cd ./mailer
       - go build
-  - name: slack after
+  - name: slack after build
     image: plugins/slack
     settings:
       channel: drone-ci
@@ -74,16 +74,51 @@ steps:
     commands:
       - cd ./mailer
       - go test
-  - name: slack after
+  - name: slack after test
     image: plugins/slack
     settings:
       channel: drone-ci
       template: >
         {{repo.name}}:
         {{#success build.status}}
-        build #{{build.number}} succeeded!
+        test #{{build.number}} succeeded!
         {{else}}
-        build #{{build.number}} failed!
+        test #{{build.number}} failed!
+        {{/success}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+    when:
+      status: [ success, failure ]
+
+---
+kind: pipeline
+type: docker
+name: build docker images
+
+trigger:
+  event: [ push ]
+
+steps:
+  - name: build scraper image
+    image: docker
+    commands:
+      - cd ./scraper
+      - docker image build -rm .
+  - name: build mailer image
+    image: docker
+    commands:
+      - cd ./mailer
+      - docker image build -rm .
+  - name: slack after docker image build
+    image: plugins/slack
+    settings:
+      channel: drone-ci
+      template: >
+        {{repo.name}}:
+        {{#success build.status}}
+        docker image build #{{build.number}} succeeded!
+        {{else}}
+        docker image build #{{build.number}} failed!
         {{/success}}
       webhook:
         from_secret: SLACK_WEBHOOK_URL
@@ -104,16 +139,16 @@ steps:
 
 #   - name: deploy prod
 
-#   - name: slack after
+#   - name: slack after deploy
 #     image: plugins/slack
 #     settings:
 #       channel: drone-ci
 #       template: >
 #         {{repo.name}}:
 #         {{#success build.status}}
-#         build #{{build.number}} succeeded!
+#         deploy #{{build.number}} succeeded!
 #         {{else}}
-#         build #{{build.number}} failed!
+#         deploy #{{build.number}} failed!
 #         {{/success}}
 #       webhook:
 #         from_secret: SLACK_WEBHOOK_URL
