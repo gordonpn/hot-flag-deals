@@ -1,5 +1,6 @@
 ---
 kind: pipeline
+type: docker
 name: notification
 
 trigger:
@@ -18,6 +19,76 @@ steps:
         {{build.link}}
       webhook:
         from_secret: SLACK_WEBHOOK_URL
+
+---
+kind: pipeline
+type: docker
+name: build
+
+trigger:
+  event: [ push ]
+
+steps:
+  - name: build scraper
+    image: golang:1.14-alpine
+    commands:
+      - cd ./scraper
+      - go build
+  - name: build mailer
+    image: golang:1.14-alpine
+    commands:
+      - cd ./mailer
+      - go build
+  - name: slack after
+    image: plugins/slack
+    settings:
+      channel: drone-ci
+      template: >
+        {{repo.name}}:
+        {{#success build.status}}
+        build #{{build.number}} succeeded!
+        {{else}}
+        build #{{build.number}} failed!
+        {{/success}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+    when:
+      status: [ success, failure ]
+
+---
+kind: pipeline
+type: docker
+name: test
+
+trigger:
+  event: [ push ]
+
+steps:
+  - name: test scraper
+    image: golang:1.14-buster
+    commands:
+      - cd ./scraper
+      - go test
+  - name: test mailer
+    image: golang:1.14-buster
+    commands:
+      - cd ./mailer
+      - go test
+  - name: slack after
+    image: plugins/slack
+    settings:
+      channel: drone-ci
+      template: >
+        {{repo.name}}:
+        {{#success build.status}}
+        build #{{build.number}} succeeded!
+        {{else}}
+        build #{{build.number}} failed!
+        {{/success}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+    when:
+      status: [ success, failure ]
 
 # ---
 # kind: pipeline
@@ -53,71 +124,3 @@ steps:
 #   - name: dockersock
 #     host:
 #       path: /var/run/docker.sock
-
----
-kind: pipeline
-name: build
-
-trigger:
-  event: [ push ]
-
-steps:
-  - name: build scraper
-    image: golang:1.14-alpine
-    commands:
-      - cd ./scraper
-      - go build
-  - name: build mailer
-    image: golang:1.14-alpine
-    commands:
-      - cd ./mailer
-      - go build
-  - name: slack after
-    image: plugins/slack
-    settings:
-      channel: drone-ci
-      template: >
-        {{repo.name}}:
-        {{#success build.status}}
-        build #{{build.number}} succeeded!
-        {{else}}
-        build #{{build.number}} failed!
-        {{/success}}
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-    when:
-      status: [ success, failure ]
-
----
-kind: pipeline
-name: test
-
-trigger:
-  event: [ push ]
-
-steps:
-  - name: test scraper
-    image: golang:1.14-alpine
-    commands:
-      - cd ./scraper
-      - go test
-  - name: test mailer
-    image: golang:1.14-alpine
-    commands:
-      - cd ./mailer
-      - go test
-  - name: slack after
-    image: plugins/slack
-    settings:
-      channel: drone-ci
-      template: >
-        {{repo.name}}:
-        {{#success build.status}}
-        build #{{build.number}} succeeded!
-        {{else}}
-        build #{{build.number}} failed!
-        {{/success}}
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-    when:
-      status: [ success, failure ]
