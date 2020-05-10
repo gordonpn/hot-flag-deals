@@ -14,7 +14,7 @@ Software as a service scraping the [Hot Deals forums](https://forums.redflagdeal
 
 Red Flag Deals does aggregate deals on their front page, **but** the Hot Deals Forums are community driven and crowdsourced. This is where the purpose of my project comes into play, this project scrapes the Hot Deals Forums several times per day.
 
-Red Flag Deals does aggregate deals on their front page, but the Hot Deals Forums are community driven and sourced by anybody. This is where the purpose of my project comes into play, this project scrapes the Hot Deals Forums several times per day.
+With this project, I saved myself the chore of checking the (messy) forum a few times a day while still being aware of the good deals posted by the community.
 
 ## Screenshot
 

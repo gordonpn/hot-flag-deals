@@ -68,12 +68,12 @@ steps:
     image: golang:1.14-buster
     commands:
       - cd ./scraper
-      - go test
+      - go test -v
   - name: test mailer
     image: golang:1.14-buster
     commands:
       - cd ./mailer
-      - go test
+      - go test -v
   - name: slack after test
     image: plugins/slack
     settings:
@@ -103,12 +103,12 @@ steps:
     image: docker
     commands:
       - cd ./scraper
-      - docker image build -rm .
+      - docker image build --rm .
   - name: build mailer image
     image: docker
     commands:
       - cd ./mailer
-      - docker image build -rm .
+      - docker image build --rm .
   - name: slack after docker image build
     image: plugins/slack
     settings:
