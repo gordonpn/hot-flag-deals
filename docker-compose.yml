@@ -3,6 +3,37 @@ services:
   hotdeals_postgres:
     image: postgres
     user: 1000:1000
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_NONROOT_DB
+      - POSTGRES_NONROOT_PASSWORD
+      - POSTGRES_NONROOT_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - TZ
     volumes:
       - ./.docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    restart: unless-stopped
+
+  hotdeals_scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_NONROOT_DB
+      - POSTGRES_NONROOT_PASSWORD
+      - POSTGRES_NONROOT_USER
+      - SCRAPER_HC_UUID
+      - TZ
+
+  hotdeals_mailer:
+    build:
+      context: ./mailer
+      dockerfile: Dockerfile
+    environment:
+      - MAILER_HC_UUID
+      - POSTGRES_NONROOT_DB
+      - POSTGRES_NONROOT_PASSWORD
+      - POSTGRES_NONROOT_USER
+      - SENDGRID_API_KEY
+      - SENDGRID_TEMPLATE
+      - TZ

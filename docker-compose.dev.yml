@@ -2,10 +2,27 @@ version: '3.8'
 services:
   hotdeals_postgres:
     container_name: hotdeals_postgres-dev
-    env_file:
-      - ./scraper/.env
     volumes:
-      - ./database-data:/var/lib/postgresql/data/
+      - dev-postgres-hotdeals:/var/lib/postgresql/data/
     ports:
       - 5432:5432
-    restart: "no"
+
+  hotdeals_scraper:
+    container_name: hotdeals_scraper-dev
+    environment:
+      - DEV
+    depends_on:
+      - hotdeals_postgres-dev
+
+  hotdeals_mailer:
+    container_name: hotdeals_mailer-dev
+    environment:
+      - DEV
+    depends_on:
+      - hotdeals_postgres-dev
+
+volumes:
+  dev-postgres-hotdeals:
+    external:
+      name: dev-postgres-hotdeals
+

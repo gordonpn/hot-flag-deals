@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  hotdeals_postgres:
+    container_name: hotdeals_postgres
+    volumes:
+      - postgres-hotdeals:/var/lib/postgresql/data
+    expose:
+      - 5432
+    restart: unless-stopped
+
+    hotdeals_scraper:
+      container_name: hotdeals_scraper
+      depends_on:
+        - hotdeals_postgres
+      restart: unless-stopped
+
+    hotdeals_mailer:
+      container_name: hotdeals_mailer
+      depends_on:
+        - hotdeals_postgres
+      restart: unless-stopped
+
+volumes:
+  postgres-hotdeals:
+    external:
+      name: postgres-hotdeals

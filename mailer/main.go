@@ -60,7 +60,7 @@ func init() {
 }
 
 func job() {
-	signalHealthCheck("start")
+	signalHealthCheck("/start")
 
 	threads := retrieveThreads()
 	filteredThreads := filter(threads)
@@ -73,7 +73,7 @@ func job() {
 }
 
 func signalHealthCheck(action string) {
-	start, err := http.Get(fmt.Sprintf("%s/%s/%s", HCURL, os.Getenv("MAILER_HC_UUID"), action))
+	start, err := http.Get(fmt.Sprintf("%s/%s%s", HCURL, os.Getenv("MAILER_HC_UUID"), action))
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
 	}
