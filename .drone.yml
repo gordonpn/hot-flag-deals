@@ -101,11 +101,17 @@ trigger:
 steps:
   - name: build scraper image
     image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
       - cd ./scraper
       - docker image build --rm .
   - name: build mailer image
     image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
       - cd ./mailer
       - docker image build --rm .
@@ -124,6 +130,11 @@ steps:
         from_secret: SLACK_WEBHOOK_URL
     when:
       status: [ success, failure ]
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 
 # ---
 # kind: pipeline
