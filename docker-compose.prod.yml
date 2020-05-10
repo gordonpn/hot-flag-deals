@@ -8,17 +8,17 @@ services:
       - 5432
     restart: unless-stopped
 
-    hotdeals_scraper:
-      container_name: hotdeals_scraper
-      depends_on:
-        - hotdeals_postgres
-      restart: unless-stopped
+  hotdeals_scraper:
+    container_name: hotdeals_scraper
+    depends_on:
+      - hotdeals_postgres
+    restart: unless-stopped
 
-    hotdeals_mailer:
-      container_name: hotdeals_mailer
-      depends_on:
-        - hotdeals_postgres
-      restart: unless-stopped
+  hotdeals_mailer:
+    container_name: hotdeals_mailer
+    depends_on:
+      - hotdeals_postgres
+    restart: unless-stopped
 
 volumes:
   postgres-hotdeals:
