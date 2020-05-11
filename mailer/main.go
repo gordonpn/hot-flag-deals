@@ -65,8 +65,8 @@ func job() {
 	threads := retrieveThreads()
 	filteredThreads := filter(threads)
 	if len(filteredThreads) > 0 {
-		err := sendNewsletter(filteredThreads)
-		if err != nil {
+		ok := sendNewsletter(filteredThreads)
+		if ok {
 			setSeen(filteredThreads)
 		}
 	}
@@ -273,8 +273,8 @@ func getSubscribers() (subscribers []subscriber) {
 		tempSub := subscriber{}
 		err = subscribersRow.Scan(
 			&tempSub.ID,
-			&tempSub.Email,
 			&tempSub.Name,
+			&tempSub.Email,
 		)
 		warnErr(err)
 		subscribers = append(subscribers, tempSub)
@@ -301,6 +301,10 @@ func getEmailBody(threads []thread) []byte {
 	subscribers := getSubscribers()
 
 	for _, subscriber := range subscribers {
+		log.WithFields(log.Fields{
+			"Name": subscriber.Name,
+			"Email": subscriber.Email,
+		}).Debug()
 		tos = append(tos, mail.NewEmail(subscriber.Name, subscriber.Email))
 	}
 
@@ -327,7 +331,7 @@ func getEmailBody(threads []thread) []byte {
 	return mail.GetRequestBody(m)
 }
 
-func sendNewsletter(threads []thread) error {
+func sendNewsletter(threads []thread) bool {
 	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	var Body = getEmailBody(threads)
@@ -339,7 +343,7 @@ func sendNewsletter(threads []thread) error {
 		log.WithFields(log.Fields{"Status Code": response.StatusCode}).Debug()
 		log.WithFields(log.Fields{"Body": response.Body}).Debug()
 	}
-	return err
+	return (response.StatusCode >= 200 && response.StatusCode < 300)
 }
 
 func setSeen(threads []thread) {
