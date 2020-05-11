@@ -302,7 +302,7 @@ func getEmailBody(threads []thread) []byte {
 
 	for _, subscriber := range subscribers {
 		log.WithFields(log.Fields{
-			"Name": subscriber.Name,
+			"Name":  subscriber.Name,
 			"Email": subscriber.Email,
 		}).Debug()
 		tos = append(tos, mail.NewEmail(subscriber.Name, subscriber.Email))
@@ -337,13 +337,15 @@ func sendNewsletter(threads []thread) bool {
 	var Body = getEmailBody(threads)
 	request.Body = Body
 	response, err := sendgrid.API(request)
+	statusCode := 0
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn()
 	} else {
-		log.WithFields(log.Fields{"Status Code": response.StatusCode}).Debug()
+		statusCode = response.StatusCode
+		log.WithFields(log.Fields{"Status Code": statusCode}).Debug()
 		log.WithFields(log.Fields{"Body": response.Body}).Debug()
 	}
-	return (response.StatusCode >= 200 && response.StatusCode < 300)
+	return statusCode >= 200 && statusCode < 300
 }
 
 func setSeen(threads []thread) {
