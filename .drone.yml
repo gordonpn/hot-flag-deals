@@ -136,37 +136,100 @@ volumes:
     host:
       path: /var/run/docker.sock
 
-# ---
-# kind: pipeline
-# type: docker
-# name: deploy
+---
+kind: pipeline
+type: docker
+name: deploy
 
-# trigger:
-#   event: [ push ]
-#   branch: [ master, develop ]
+trigger:
+  event: [ push ]
+  branch: [ master, develop ]
 
-# steps:
-#   - name: deploy dev
+steps:
+  - name: deploy dev
+    image: docker/compose:1.25.5
+    when:
+      branch: [develop]
+    environment:
+      DEV: "true"
+      COMPOSE_PROJECT_NAME: hotdeals-dev
+      TZ: America/Montreal
+      MAILER_HC_UUID:
+        from_secret: MAILER_HC_UUID
+      POSTGRES_DB:
+        from_secret: POSTGRES_DB
+      POSTGRES_NONROOT_DB:
+        from_secret: POSTGRES_NONROOT_DB
+      POSTGRES_NONROOT_PASSWORD:
+        from_secret: POSTGRES_NONROOT_PASSWORD
+      POSTGRES_NONROOT_USER:
+        from_secret: POSTGRES_NONROOT_USER
+      POSTGRES_PASSWORD:
+        from_secret: POSTGRES_PASSWORD
+      POSTGRES_USER:
+        from_secret: POSTGRES_USER
+      SCRAPER_HC_UUID:
+        from_secret: SCRAPER_HC_UUID
+      SENDGRID_API_KEY:
+        from_secret: SENDGRID_API_KEY
+      SENDGRID_TEMPLATE:
+        from_secret: SENDGRID_TEMPLATE
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - /bin/sh /drone/src/.docker/scripts/deploy_dev.sh
 
-#   - name: deploy prod
+  - name: deploy prod
+    image: docker/compose:1.25.5
+    when:
+      branch: [master]
+    environment:
+      COMPOSE_PROJECT_NAME: hotdeals
+      TZ: America/Montreal
+      MAILER_HC_UUID:
+        from_secret: MAILER_HC_UUID
+      POSTGRES_DB:
+        from_secret: POSTGRES_DB
+      POSTGRES_NONROOT_DB:
+        from_secret: POSTGRES_NONROOT_DB
+      POSTGRES_NONROOT_PASSWORD:
+        from_secret: POSTGRES_NONROOT_PASSWORD
+      POSTGRES_NONROOT_USER:
+        from_secret: POSTGRES_NONROOT_USER
+      POSTGRES_PASSWORD:
+        from_secret: POSTGRES_PASSWORD
+      POSTGRES_USER:
+        from_secret: POSTGRES_USER
+      SCRAPER_HC_UUID:
+        from_secret: SCRAPER_HC_UUID
+      SENDGRID_API_KEY:
+        from_secret: SENDGRID_API_KEY
+      SENDGRID_TEMPLATE:
+        from_secret: SENDGRID_TEMPLATE
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - /bin/sh /drone/src/.docker/scripts/deploy_prod.sh
 
-#   - name: slack after deploy
-#     image: plugins/slack
-#     settings:
-#       channel: drone-ci
-#       template: >
-#         {{repo.name}}:
-#         {{#success build.status}}
-#         deploy #{{build.number}} succeeded!
-#         {{else}}
-#         deploy #{{build.number}} failed!
-#         {{/success}}
-#       webhook:
-#         from_secret: SLACK_WEBHOOK_URL
-#     when:
-#       status: [ success, failure ]
+  - name: slack after deploy
+    image: plugins/slack
+    settings:
+      channel: drone-ci
+      template: >
+        {{repo.name}}:
+        {{#success build.status}}
+        deploy #{{build.number}} succeeded!
+        {{else}}
+        deploy #{{build.number}} failed!
+        {{/success}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+    when:
+      status: [ success, failure ]
 
-# volumes:
-#   - name: dockersock
-#     host:
-#       path: /var/run/docker.sock
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
