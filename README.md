@@ -7,6 +7,7 @@ Software as a service scraping the [Hot Deals forums](https://forums.redflagdeal
 ---
 [![Build Status](https://drone.gordon-pn.com/api/badges/gordonpn/hot-flag-deals/status.svg)](https://drone.gordon-pn.com/gordonpn/hot-flag-deals)
 ![Healthchecks.io](https://healthchecks.io/badge/85143171-fec6-42e7-b3d8-bc7f499f5d0d/r5YwfK0Y.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gordonpn/hot-flag-deals)](https://goreportcard.com/report/github.com/gordonpn/hot-flag-deals)
 ![Last commit on develop](https://badgen.net/github/last-commit/gordonpn/hot-flag-deals/develop)
 ![License](https://badgen.net/github/license/gordonpn/hot-flag-deals)
 
