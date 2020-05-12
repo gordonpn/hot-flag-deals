@@ -136,18 +136,27 @@ func upsertIntoDB(threads []thread) {
 	user := os.Getenv("POSTGRES_NONROOT_USER")
 	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")
 	dbname := os.Getenv("POSTGRES_NONROOT_DB")
-
 	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	db, err := sql.Open("postgres", pgURI)
-	if err != nil {
-		log.Error("Error with opening connection with DB")
-		panic(err)
-	}
-	defer db.Close()
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
+	var db *sql.DB
+	log.Info("Attempting to connect to DB")
+	for i := 1; i < 6; i++ {
+		db, err := sql.Open("postgres", pgURI)
+		if err != nil {
+			log.Error("Error with opening connection with DB")
+			panic(err)
+		}
+
+		err = db.Ping()
+		if err == nil {
+			break
+		}
+		retryWait := i * i
+		log.Info(fmt.Sprintf("Connection attempt %d unsuccessful, retrying in %d seconds...", i, retryWait))
+		time.Sleep(time.Duration(retryWait) * time.Second)
+	}
+	if db == nil {
+		log.Fatal("Could not connect to DB")
 	}
 
 	log.Info("Successfully connected to DB")
