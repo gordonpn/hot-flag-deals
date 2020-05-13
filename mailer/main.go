@@ -100,9 +100,10 @@ func connectDB() app {
 	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	var db *sql.DB
+	var err error
 	log.Info("Attempting to connect to DB")
 	for i := 1; i < 6; i++ {
-		db, err := sql.Open("postgres", pgURI)
+		db, err = sql.Open("postgres", pgURI)
 		if err != nil {
 			log.Error("Error with opening connection with DB")
 			panic(err)
@@ -257,7 +258,11 @@ func filter(threads []thread) (filteredThreads []thread) {
 
 	for _, thread := range threads {
 		if (thread.Views >= viewsThreshold && thread.Votes >= votesThreshold) && !thread.Seen {
-			filteredThreads = append(filteredThreads, thread)
+			timeNow := time.Now()
+			diffHours := timeNow.Sub(thread.DatePosted).Hours()
+			if diffHours < 48 {
+				filteredThreads = append(filteredThreads, thread)
+			}
 		}
 	}
 	sort.SliceStable(filteredThreads, func(this, that int) bool {
