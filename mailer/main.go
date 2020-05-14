@@ -162,18 +162,19 @@ func retrieveThreads() (threads []thread) {
 
 func getThresholds(threads []thread) (viewsThreshold, votesThreshold int) {
 	var (
-		viewsMean         float64
-		viewsMedian       int
-		viewsSkewness     float64
-		viewsSlice        []int
-		viewsStandDev     float64
-		votesMean         float64
-		votesMedian       int
-		votesSkewness     float64
-		votesSlice        []int
-		votesStandDev     float64
-		standDevThreshold = 0.9
-		thresholdFactor   = 1.3
+		standDevThreshold   = 0.9
+		viewsMean           float64
+		viewsMedian         int
+		viewsSkewness       float64
+		viewsSlice          []int
+		viewsStandDev       float64
+		viewsThresholdCoeff = 1.05
+		votesMean           float64
+		votesMedian         int
+		votesSkewness       float64
+		votesSlice          []int
+		votesStandDev       float64
+		votesThresholdCoeff = 5.0
 	)
 	for _, thread := range threads {
 		viewsSlice = append(viewsSlice, thread.Views)
@@ -201,8 +202,8 @@ func getThresholds(threads []thread) (viewsThreshold, votesThreshold int) {
 	} else {
 		votesThreshold = Round(votesMean)
 	}
-	viewsThreshold = Round(float64(viewsThreshold) * thresholdFactor)
-	votesThreshold = Round(float64(votesThreshold) * thresholdFactor)
+	viewsThreshold = Round(float64(viewsThreshold) * viewsThresholdCoeff)
+	votesThreshold = Round(float64(votesThreshold) * votesThresholdCoeff)
 	log.WithFields(log.Fields{
 		"viewsMean":              viewsMean,
 		"viewsMedian":            viewsMedian,
@@ -255,12 +256,13 @@ func GetSkewness(mean float64, median int, standDev float64) (skewness float64) 
 
 func filter(threads []thread) (filteredThreads []thread) {
 	viewsThreshold, votesThreshold := getThresholds(threads)
+	const TimeThreshold = 72
 
 	for _, thread := range threads {
-		if (thread.Views >= viewsThreshold && thread.Votes >= votesThreshold) && !thread.Seen {
+		if (thread.Views >= viewsThreshold || thread.Votes >= votesThreshold) && !thread.Seen {
 			timeNow := time.Now()
 			diffHours := timeNow.Sub(thread.DatePosted).Hours()
-			if diffHours < 48 {
+			if diffHours <= TimeThreshold {
 				filteredThreads = append(filteredThreads, thread)
 			}
 		}
