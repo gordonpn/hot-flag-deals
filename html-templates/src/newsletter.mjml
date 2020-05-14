@@ -1,0 +1,40 @@
+<mjml>
+  <mj-head>
+    <mj-font name="FontAwesome" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <mj-style inline="inline">
+      .link-nostyle { color: inherit; text-decoration: none }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+
+    <mj-section background-color="#3b4a6b">
+      <mj-column>
+        <mj-text font-family="Trebuchet MS, sans-serif" font-size="30px" color="#FFFFFF" align="center">Newsletter</mj-text>
+        <mj-text font-family="Trebuchet MS, sans-serif" font-size="40px" color="#fc5185" align="center">RedFlagDeals</mj-text>
+        <mj-text font-family="Trebuchet MS, sans-serif" font-size="20px" color="#FFFFFF" align="center">{{date}}</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column>
+        <mj-raw>
+        {{#each deals}}
+        </mj-raw>
+
+        <mj-text line-height="20px" font-size="15px" align="center" color="#3b4a6b"><a href="{{link}}" class="link-nostyle">{{title}}</a></mj-text>
+
+        <mj-raw>
+        {{/each}}
+        </mj-raw>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f0f0f0">
+      <mj-column>
+        <mj-text align="center" font-size="25px" font-family="FontAwesome"><a href="https://github.com/gordonpn/hot-flag-deals" class="link-nostyle">&#xf09b;</a></mj-text>
+        <mj-text align="center" font-size="13px" font-family="Trebuchet MS, sans-serif"><a href="https://github.com/gordonpn/hot-flag-deals" class="link-nostyle">Check out the project on GitHub!</a></mj-text>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>
