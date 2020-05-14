@@ -31,7 +31,10 @@
 
     <mj-section background-color="#f0f0f0">
       <mj-column>
-        <mj-text align="center" font-size="25px" font-family="FontAwesome"><a href="https://github.com/gordonpn/hot-flag-deals" class="link-nostyle">&#xf09b;</a></mj-text>
+        <mj-social>
+          <mj-social-element href="https://github.com/gordonpn/hot-flag-deals" name="github"></mj-social-element>
+          <mj-social-element href="https:/gordon-pn.com" name="web"></mj-social-element>
+        </mj-social>
         <mj-text align="center" font-size="13px" font-family="Trebuchet MS, sans-serif"><a href="https://github.com/gordonpn/hot-flag-deals" class="link-nostyle">Check out the project on GitHub!</a></mj-text>
       </mj-column>
     </mj-section>
