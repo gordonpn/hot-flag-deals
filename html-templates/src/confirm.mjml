@@ -1,0 +1,28 @@
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-class name="body-text" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"/>
+    </mj-attributes>
+    <mj-style inline="inline">
+      .link-nostyle { color: inherit; text-decoration: none }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-include path='./header.mjml'></mj-include>
+
+    <mj-section>
+      <mj-column>
+        <mj-text mj-class="body-text">Hello {{name}}!</mj-text>
+        <mj-text mj-class="body-text">Thank you for subscribing!</mj-text>
+        <mj-divider border-color="#f0f0f0"/>
+        <mj-text mj-class="body-text" align="center">Please click the button below to confirm your subscription to the newsletter!</mj-text>
+        <mj-button mj-class="body-text" background-color="#3b4a6b" color="white" href="{{confirmLink}}">Confirm</mj-button>
+        <mj-divider border-color="#f0f0f0"/>
+        <mj-text font-size="10px" mj-class="body-text">If the button above does not work, please use the following link</mj-text>
+        <mj-text font-size="10px" mj-class="body-text"><a href="{{confirmLink}}" class="link-nostyle" target="_blank">{{confirmLink}}</a></mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path='./footer.mjml'></mj-include>
+  </mj-body>
+</mjml>

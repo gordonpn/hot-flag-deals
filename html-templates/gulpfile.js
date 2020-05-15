@@ -1,6 +1,7 @@
 const { src, dest, watch, series } = require('gulp');
 const del = require('del');
 const mjml = require('gulp-mjml');
+const mjmlEngine = require('mjml');
 const server = require('browser-sync').create();
 
 const SRC = './src/**/*.mjml';
@@ -21,9 +22,13 @@ const serve = (done) => {
   done();
 };
 
-const build = () => {
+const build = (done) => {
   return src(SRC)
-    .pipe(mjml())
+    .pipe(mjml(mjmlEngine, {minify: false, validationLevel: 'strict'}))
+    .on('error', err => {
+      console.log(err.toString());
+      done();
+    })
     .pipe(dest(DEST));
 };
 

@@ -1,0 +1,7 @@
+<mj-section background-color="#3b4a6b">
+  <mj-column>
+    <mj-text font-family="Trebuchet MS, sans-serif" font-size="30px" color="#FFFFFF" align="center">Newsletter</mj-text>
+    <mj-text font-family="Trebuchet MS, sans-serif" font-size="40px" color="#fc5185" align="center">RedFlagDeals</mj-text>
+    <mj-text font-family="Trebuchet MS, sans-serif" font-size="20px" color="#FFFFFF" align="center">{{date}}</mj-text>
+  </mj-column>
+</mj-section

@@ -8,8 +8,8 @@
     "build": "gulp build"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Gordon Pham-Nguyen (gordonpn)",
+  "license": "MIT",
   "dependencies": {
     "mjml": "^4.6.3"
   },
