@@ -19,7 +19,7 @@ With this project, I saved myself the chore of checking the (messy) forum a few 
 
 ## Screenshot
 
-![Newsletter screenshot](./docs/newsletter.png)
+<a href="./docs/newsletter.png"><img src="./docs/newsletter.png" height="600"></a>
 
 Base template design by [@tiffzeng](https://github.com/tiffzeng)
 
