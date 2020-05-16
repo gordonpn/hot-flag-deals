@@ -1,3 +1,4 @@
+'use strict';
 const { src, dest, watch, series } = require('gulp');
 const del = require('del');
 const mjml = require('gulp-mjml');

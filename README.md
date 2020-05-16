@@ -11,6 +11,8 @@ Software as a service scraping the [Hot Deals forums](https://forums.redflagdeal
 ![Last commit on develop](https://badgen.net/github/last-commit/gordonpn/hot-flag-deals/develop)
 ![License](https://badgen.net/github/license/gordonpn/hot-flag-deals)
 
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/gordonpn)
+
 ## Objective / Motivation
 
 Red Flag Deals does aggregate deals on their front page, **but** the Hot Deals Forums are community driven and crowdsourced. This is where the purpose of my project comes into play, this project scrapes the Hot Deals Forums several times per day.
@@ -19,7 +21,7 @@ With this project, I saved myself the chore of checking the (messy) forum a few 
 
 ## Screenshot
 
-<a href="./docs/newsletter.png"><img src="./docs/newsletter.png" height="600"></a>
+<a href="./docs/newsletter.png"><img src="./docs/newsletter.png" height="900"></a>
 
 Base template design by [@tiffzeng](https://github.com/tiffzeng)
 
