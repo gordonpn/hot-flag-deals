@@ -141,7 +141,6 @@ func upsertIntoDB(threads []thread) {
 
 	var db *sql.DB
 	var err error
-	defer db.Close()
 	log.Info("Attempting to connect to DB")
 	for i := 1; i < 6; i++ {
 		db, err = sql.Open("postgres", pgURI)
@@ -163,6 +162,7 @@ func upsertIntoDB(threads []thread) {
 	}
 
 	log.Info("Successfully connected to DB")
+	defer db.Close()
 
 	log.WithFields(log.Fields{
 		"len(threads)": len(threads),
@@ -175,7 +175,7 @@ func upsertIntoDB(threads []thread) {
 	  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	  ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
 
-		_, err := db.Exec(sqlStatement, thread.ID, thread.Title, thread.Link, thread.Posts, thread.Votes, thread.Views, thread.DatePosted, thread.Seen)
+		_, err = db.Exec(sqlStatement, thread.ID, thread.Title, thread.Link, thread.Posts, thread.Votes, thread.Views, thread.DatePosted, thread.Seen)
 		if err != nil {
 			log.WithFields(log.Fields{"Error": err}).Error("Problem with inserting")
 		}
