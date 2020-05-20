@@ -71,6 +71,7 @@ func job() {
 			setSeen(filteredThreads)
 		}
 	}
+	cleanUp()
 
 	signalHealthCheck("")
 }
@@ -350,6 +351,7 @@ func getEmailBody(threads []thread) []byte {
 }
 
 func sendNewsletter(threads []thread) bool {
+	// todo fix: one 'to' per email
 	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	var Body = getEmailBody(threads)
@@ -377,7 +379,15 @@ func setSeen(threads []thread) {
 		_, err := db.Exec(sqlStatement, true, thread.ID)
 		warnErr(err)
 	}
+}
 
+func cleanUp() {
+	db := connectDB().Database
+	log.Debug("Closing connection with DB")
+	err := db.Close()
+	if err != nil {
+		log.WithFields(log.Fields{"err": err}).Fatal("Error with closing connection to DB")
+	}
 }
 
 func Round(val float64) int {
