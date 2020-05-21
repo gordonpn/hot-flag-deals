@@ -17,14 +17,18 @@ var postgresDB pgdb
 
 func GetDB() pgdb {
 	if postgresDB.Database != nil {
-		return postgresDB
+		err := postgresDB.Database.Ping()
+		if err == nil {
+			return postgresDB
+		}
 	}
 	postgresDB.Database = connectDB()
 	return postgresDB
 }
 
 func RetrieveThreads() (threads []types.Thread) {
-	db := GetDB().Database
+	pgDatabase := GetDB()
+	db := pgDatabase.Database
 
 	sqlStatement := `
   SELECT *
@@ -57,7 +61,8 @@ func RetrieveThreads() (threads []types.Thread) {
 }
 
 func CleanUp() {
-	db := GetDB().Database
+	pgDatabase := GetDB()
+	db := pgDatabase.Database
 	log.Debug("Closing connection with DB")
 	err := db.Close()
 	if err != nil {
@@ -66,7 +71,8 @@ func CleanUp() {
 }
 
 func SetSeen(threads []types.Thread) {
-	db := GetDB().Database
+	pgDatabase := GetDB()
+	db := pgDatabase.Database
 	for _, thread := range threads {
 		sqlStatement := `
     UPDATE threads

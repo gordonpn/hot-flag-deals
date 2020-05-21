@@ -32,7 +32,8 @@ func SendNewsletter(threads []types.Thread) {
 }
 
 func getSubscribers() (subscribers []types.Subscriber) {
-	db := database.GetDB().Database
+	pgDatabase := database.GetDB()
+	db := pgDatabase.Database
 
 	sqlStatement := `
   SELECT *
