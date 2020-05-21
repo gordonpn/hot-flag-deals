@@ -11,22 +11,24 @@ import (
 	"time"
 )
 
-func SendNewsletter(threads []types.Thread) bool {
-	// todo fix: one 'to' per email
-	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
-	request.Method = "POST"
-	var Body = getEmailBody(threads)
-	request.Body = Body
-	response, err := sendgrid.API(request)
-	statusCode := 0
-	if err != nil {
-		log.WithFields(log.Fields{"Error": err}).Warn()
-	} else {
-		statusCode = response.StatusCode
-		log.WithFields(log.Fields{"Status Code": statusCode}).Debug()
-		log.WithFields(log.Fields{"Body": response.Body}).Debug()
+func SendNewsletter(threads []types.Thread) {
+	subscribers := getSubscribers()
+
+	for _, subscriber := range subscribers {
+		request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
+		request.Method = "POST"
+		var Body = getEmailBody(threads, subscriber)
+		request.Body = Body
+		response, err := sendgrid.API(request)
+		statusCode := 0
+		if err != nil {
+			log.WithFields(log.Fields{"Error": err}).Warn()
+		} else {
+			statusCode = response.StatusCode
+			log.WithFields(log.Fields{"Status Code": statusCode}).Debug()
+			log.WithFields(log.Fields{"Body": response.Body}).Debug()
+		}
 	}
-	return statusCode >= 200 && statusCode < 300
 }
 
 func getSubscribers() (subscribers []types.Subscriber) {
@@ -56,7 +58,7 @@ func getSubscribers() (subscribers []types.Subscriber) {
 	return
 }
 
-func getEmailBody(threads []types.Thread) []byte {
+func getEmailBody(threads []types.Thread, subscriber types.Subscriber) []byte {
 	m := mail.NewV3Mail()
 
 	address := "deals@gordon-pn.com"
@@ -67,18 +69,14 @@ func getEmailBody(threads []types.Thread) []byte {
 	m.SetTemplateID(os.Getenv("SENDGRID_TEMPLATE"))
 
 	p := mail.NewPersonalization()
-	var tos []*mail.Email
-	subscribers := getSubscribers()
 
-	for _, subscriber := range subscribers {
-		log.WithFields(log.Fields{
-			"Name":  subscriber.Name,
-			"Email": subscriber.Email,
-		}).Debug()
-		tos = append(tos, mail.NewEmail(subscriber.Name, subscriber.Email))
-	}
+	log.WithFields(log.Fields{
+		"Name":  subscriber.Name,
+		"Email": subscriber.Email,
+	}).Debug()
 
-	p.AddTos(tos...)
+	to := mail.NewEmail(subscriber.Name, subscriber.Email)
+	p.AddTos(to)
 
 	dateNow := time.Now()
 	date := fmt.Sprintf("%s %d, %d", dateNow.Month(), dateNow.Day(), dateNow.Year())

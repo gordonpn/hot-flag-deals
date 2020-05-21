@@ -42,10 +42,8 @@ func job() {
 	threads := database.RetrieveThreads()
 	filteredThreads := filter.Filter(threads)
 	if len(filteredThreads) > 0 {
-		ok := sendgridmailer.SendNewsletter(filteredThreads)
-		if ok {
-			database.SetSeen(filteredThreads)
-		}
+		sendgridmailer.SendNewsletter(filteredThreads)
+		database.SetSeen(filteredThreads)
 	}
 	database.CleanUp()
 
