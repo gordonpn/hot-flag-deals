@@ -107,7 +107,7 @@ func Filter(threads []types.Thread) (filteredThreads []types.Thread) {
 	const TimeThreshold = 72
 
 	for _, thread := range threads {
-		if (thread.Views >= viewsThreshold || thread.Votes >= votesThreshold) && !thread.Seen {
+		if (thread.Views >= viewsThreshold && thread.Votes >= votesThreshold) && !thread.Seen {
 			timeNow := time.Now()
 			diffHours := timeNow.Sub(thread.DatePosted).Hours()
 			if diffHours <= TimeThreshold {
