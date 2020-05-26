@@ -22,7 +22,7 @@ func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) 
 		votesSkewness       float64
 		votesSlice          []int
 		votesStandDev       float64
-		votesThresholdCoeff = 5.0
+		votesThresholdCoeff = 4.0
 	)
 	for _, thread := range threads {
 		viewsSlice = append(viewsSlice, thread.Views)
@@ -53,18 +53,18 @@ func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) 
 	viewsThreshold = Round(float64(viewsThreshold) * viewsThresholdCoeff)
 	votesThreshold = Round(float64(votesThreshold) * votesThresholdCoeff)
 	log.WithFields(log.Fields{
-		"viewsMean":              viewsMean,
-		"viewsMedian":            viewsMedian,
-		"viewsStandardDeviation": viewsStandDev,
-		"viewsSkewness":          viewsSkewness,
-		"viewsThreshold":         viewsThreshold,
+		"viewsMean":           viewsMean,
+		"viewsMedian":         viewsMedian,
+		"viewsSkewness":       viewsSkewness,
+		"viewsThreshold":      viewsThreshold,
+		"viewsThresholdCoeff": viewsThresholdCoeff,
 	}).Debug()
 	log.WithFields(log.Fields{
-		"votesMean":              votesMean,
-		"votesMedian":            votesMedian,
-		"votesStandardDeviation": votesStandDev,
-		"votesSkewness":          votesSkewness,
-		"votesThreshold":         votesThreshold,
+		"votesMean":           votesMean,
+		"votesMedian":         votesMedian,
+		"votesSkewness":       votesSkewness,
+		"votesThreshold":      votesThreshold,
+		"votesThresholdCoeff": votesThresholdCoeff,
 	}).Debug()
 	return
 }
