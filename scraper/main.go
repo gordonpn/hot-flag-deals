@@ -132,7 +132,7 @@ func getPosts() (threads []thread) {
 }
 
 func upsertIntoDB(threads []thread) {
-	host := "hotdeals_postgres"
+	host := "postgres"
 	port := 5432
 	user := os.Getenv("POSTGRES_NONROOT_USER")
 	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")

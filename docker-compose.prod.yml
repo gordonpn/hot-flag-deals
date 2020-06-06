@@ -1,24 +1,82 @@
 version: '3.8'
 services:
-  hotdeals_postgres:
+  postgres:
     container_name: hotdeals_postgres
+    expose:
+      - 5432
     volumes:
       - postgres-hotdeals:/var/lib/postgresql/data/
     restart: unless-stopped
+    networks:
+      - hotdeals-network
+    deploy:
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.labels.main-node == true
 
-  hotdeals_scraper:
+  scraper:
     container_name: hotdeals_scraper
-    depends_on:
-      - hotdeals_postgres
+    image: gordonpn/hotdeals-scraper:latest
+    networks:
+      - hotdeals-network
     restart: unless-stopped
+    deploy:
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
-  hotdeals_mailer:
+  mailer:
     container_name: hotdeals_mailer
-    depends_on:
-      - hotdeals_postgres
     restart: unless-stopped
+    image: gordonpn/hotdeals-mailer:latest
+    networks:
+      - hotdeals-network
+    deploy:
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 volumes:
   postgres-hotdeals:
     external:
       name: postgres-hotdeals
+
+networks:
+  hotdeals-network:
+    driver: overlay
+  traefik-public:
+    external: true
+    driver: overlay

@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  hotdeals_postgres:
+  postgres:
     image: postgres
     environment:
       - POSTGRES_DB
@@ -9,11 +9,11 @@ services:
       - POSTGRES_NONROOT_USER
       - POSTGRES_PASSWORD
       - POSTGRES_USER
-      - TZ
+      - TZ=America/Montreal
     volumes:
       - ./.docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
-  hotdeals_scraper:
+  scraper:
     build:
       context: ./scraper
       dockerfile: Dockerfile
@@ -22,9 +22,11 @@ services:
       - POSTGRES_NONROOT_PASSWORD
       - POSTGRES_NONROOT_USER
       - SCRAPER_HC_UUID
-      - TZ
+      - TZ=America/Montreal
+    depends_on:
+      - postgres
 
-  hotdeals_mailer:
+  mailer:
     build:
       context: ./mailer
       dockerfile: Dockerfile
@@ -35,4 +37,6 @@ services:
       - POSTGRES_NONROOT_USER
       - SENDGRID_API_KEY
       - SENDGRID_TEMPLATE
-      - TZ
+      - TZ=America/Montreal
+    depends_on:
+      - postgres
