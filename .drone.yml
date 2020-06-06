@@ -173,6 +173,23 @@ steps:
       - cd /drone/src/mailer
       - go get
       - golangci-lint run -E gosec ./...
+  - name: snyk scan
+    image: gordonpn/snyk-cli-drone
+    environment:
+      SNYK_TOKEN:
+        from_secret: SNYK_TOKEN
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - echo "Scan Docker images with Snyk"
+      # - snyk test --docker gordonpn/hotdeals-mailer:latest --file=Dockerfile --exclude-base-image-vulns
+      # - snyk test --docker gordonpn/hotdeals-scraper:latest --file=Dockerfile --exclude-base-image-vulns
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 ---
 kind: pipeline
 type: docker
