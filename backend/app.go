@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 	"time"
 
@@ -54,6 +56,39 @@ func (a *App) Initialize(user, password, dbname string) {
 	}
 	log.Info("Successfully connected to DB")
 	a.Router = mux.NewRouter()
+	a.initializeRoutes()
 }
 
-func (a *App) Run(addr string) {}
+func (a *App) Run(addr string) {
+	log.Fatal(http.ListenAndServe(addr, a.Router))
+}
+
+func (a *App) getThreads(w http.ResponseWriter, r *http.Request) {
+	threads, err := getThreads(a.DB)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, threads)
+}
+
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	respondWithJSON(w, code, map[string]string{"error": message})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_, err := w.Write(response)
+	if err != nil {
+		log.WithFields(log.Fields{"err": err}).Warn()
+	}
+
+}
+
+func (a *App) initializeRoutes() {
+	a.Router.HandleFunc("/api/v1/deals", a.getThreads).Methods("GET")
+}

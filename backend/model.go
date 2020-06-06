@@ -16,7 +16,7 @@ type thread struct {
 	Seen       bool      `json:"seen"`
 }
 
-func getThreads(db *sql.DB, start, count int) ([]thread, error) {
+func getThreads(db *sql.DB) ([]thread, error) {
 	sqlStatement := `SELECT * FROM threads WHERE date_posted > CURRENT_TIMESTAMP - INTERVAL '3 day';`
 
 	rows, err := db.Query(sqlStatement)
