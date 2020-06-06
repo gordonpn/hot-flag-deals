@@ -35,6 +35,9 @@ trigger:
 steps:
   - name: build scraper amd64
     image: golang:1.14-alpine
+    volumes:
+    - name: deps
+      path: /go
     environment:
       GOOS: linux
       GOARCH: amd64
@@ -43,6 +46,9 @@ steps:
       - go build
   - name: build mailer amd64
     image: golang:1.14-alpine
+    volumes:
+    - name: deps
+      path: /go
     environment:
       GOOS: linux
       GOARCH: amd64
@@ -51,6 +57,9 @@ steps:
       - go build
   - name: build scraper arm64
     image: golang:1.14-alpine
+    volumes:
+    - name: deps
+      path: /go
     environment:
       GOOS: linux
       GOARCH: arm64
@@ -59,12 +68,20 @@ steps:
       - go build
   - name: build mailer arm64
     image: golang:1.14-alpine
+    volumes:
+    - name: deps
+      path: /go
     environment:
       GOOS: linux
       GOARCH: arm64
     commands:
       - cd ./mailer
       - go build
+
+volumes:
+- name: deps
+  temp: {}
+
 ---
 kind: pipeline
 type: docker
@@ -79,14 +96,24 @@ trigger:
 steps:
   - name: test scraper
     image: golang:1.14-buster
+    volumes:
+    - name: deps
+      path: /go
     commands:
       - cd ./scraper
       - go test -v
   - name: test mailer
     image: golang:1.14-buster
+    volumes:
+    - name: deps
+      path: /go
     commands:
       - cd ./mailer
       - go test -v
+
+volumes:
+- name: deps
+  temp: {}
 ---
 kind: pipeline
 type: docker
