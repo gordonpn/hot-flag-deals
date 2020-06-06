@@ -122,6 +122,30 @@ volumes:
   - name: dockersock
     host:
       path: /var/run/docker.sock
+
+---
+kind: pipeline
+type: docker
+name: security
+
+trigger:
+  event: [ push, pull_request ]
+  branch:
+    - develop
+
+depends_on:
+  - build and publish docker image
+
+steps:
+  - name: gosec scan
+    image: golangci/golangci-lint
+    commands:
+      - cd /drone/src/scraper
+      - go get
+      - golangci-lint run -E gosec ./...
+      - cd /drone/src/mailer
+      - go get
+      - golangci-lint run -E gosec ./...
 ---
 kind: pipeline
 type: docker
@@ -197,4 +221,5 @@ depends_on:
   - build
   - test
   - build and publish docker image
+  - security
   - deploy
