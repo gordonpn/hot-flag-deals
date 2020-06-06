@@ -7,20 +7,17 @@ trigger:
   event: [ push, pull_request ]
 
 steps:
-  - name: slack before
-    image: plugins/slack
-    failure: ignore
-    settings:
-      channel: drone-ci
-      template: >
-        {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
-
-        build #{{build.number}} started
-
-        {{build.link}}
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-
+- name: slack before
+  image: plugins/slack
+  failure: ignore
+  settings:
+    channel: drone-ci
+    template: >
+      {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
+      build #{{build.number}} started
+      {{build.link}}
+    webhook:
+      from_secret: SLACK_WEBHOOK_URL
 ---
 kind: pipeline
 type: docker
@@ -29,54 +26,39 @@ name: build
 trigger:
   event: [ push, pull_request ]
   branch:
-    exclude:
-      - master
+    exclude: [ master ]
 
 steps:
-  - name: build scraper amd64
-    image: golang:1.14-alpine
-    volumes:
-    - name: deps
-      path: /go
-    environment:
-      GOOS: linux
-      GOARCH: amd64
-    commands:
-      - cd ./scraper
-      - go build
-  - name: build mailer amd64
-    image: golang:1.14-alpine
-    volumes:
-    - name: deps
-      path: /go
-    environment:
-      GOOS: linux
-      GOARCH: amd64
-    commands:
-      - cd ./mailer
-      - go build
-  - name: build scraper arm64
-    image: golang:1.14-alpine
-    volumes:
-    - name: deps
-      path: /go
-    environment:
-      GOOS: linux
-      GOARCH: arm64
-    commands:
-      - cd ./scraper
-      - go build
-  - name: build mailer arm64
-    image: golang:1.14-alpine
-    volumes:
-    - name: deps
-      path: /go
-    environment:
-      GOOS: linux
-      GOARCH: arm64
-    commands:
-      - cd ./mailer
-      - go build
+- name: build amd64
+  image: golang:1.14-alpine
+  volumes:
+  - name: deps
+    path: /go
+  environment:
+    GOOS: linux
+    GOARCH: amd64
+  commands:
+  - cd /drone/src/scraper
+  - go build
+  - cd /drone/src/mailer
+  - go build
+  - cd /drone/src/backend
+  - go build
+- name: build arm64
+  image: golang:1.14-alpine
+  volumes:
+  - name: deps
+    path: /go
+  environment:
+    GOOS: linux
+    GOARCH: arm64
+  commands:
+  - cd /drone/src/scraper
+  - go build
+  - cd /drone/src/mailer
+  - go build
+  - cd /drone/src/backend
+  - go build
 
 volumes:
 - name: deps
@@ -90,26 +72,45 @@ name: test
 trigger:
   event: [ push, pull_request ]
   branch:
-    exclude:
-      - master
+    exclude: [ master ]
 
 steps:
-  - name: test scraper
-    image: golang:1.14-buster
-    volumes:
-    - name: deps
-      path: /go
-    commands:
-      - cd ./scraper
-      - go test -v
-  - name: test mailer
-    image: golang:1.14-buster
-    volumes:
-    - name: deps
-      path: /go
-    commands:
-      - cd ./mailer
-      - go test -v
+- name: test scraper
+  image: golang:1.14-buster
+  volumes:
+  - name: deps
+    path: /go
+  commands:
+  - cd /drone/src/scraper
+  - go test -v
+- name: test mailer
+  image: golang:1.14-buster
+  volumes:
+  - name: deps
+    path: /go
+  commands:
+  - cd /drone/src/mailer
+  - go test -v
+- name: test backend
+  image: golang:1.14-buster
+  volumes:
+  - name: deps
+    path: /go
+  environment:
+    POSTGRES_NONROOT_USER: postgres
+    POSTGRES_NONROOT_DB: test
+    POSTGRES_NONROOT_PASSWORD: postgres
+  commands:
+  - cd /drone/src/backend
+  - go test -v
+
+services:
+- name: postgres
+  image: postgres
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_DB: test
+    POSTGRES_PASSWORD: postgres
 
 volumes:
 - name: deps
@@ -124,31 +125,30 @@ platform:
   arch: amd64
 
 depends_on:
-  - build
-  - test
+- build
+- test
 
 trigger:
   event: [ push, pull_request ]
   branch:
-    exclude:
-      - master
+    exclude: [ master ]
 
 steps:
-  - name: publish
-    image: gordonpn/docker-buildx-drone
-    environment:
-      DOCKER_TOKEN:
-        from_secret: DOCKER_TOKEN
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - /drone/src/.docker/scripts/build.sh
+- name: publish
+  image: gordonpn/docker-buildx-drone
+  environment:
+    DOCKER_TOKEN:
+      from_secret: DOCKER_TOKEN
+  volumes:
+  - name: dockersock
+    path: /var/run/docker.sock
+  commands:
+  - /drone/src/.docker/scripts/build.sh
 
 volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
+- name: dockersock
+  host:
+    path: /var/run/docker.sock
 
 ---
 kind: pipeline
@@ -157,39 +157,39 @@ name: security
 
 trigger:
   event: [ push, pull_request ]
-  branch:
-    - develop
+  branch: [ develop ]
 
 depends_on:
-  - build and publish docker image
+- build and publish docker image
 
 steps:
-  - name: gosec scan
-    image: golangci/golangci-lint
-    commands:
-      - cd /drone/src/scraper
-      - go get
-      - golangci-lint run -E gosec ./...
-      - cd /drone/src/mailer
-      - go get
-      - golangci-lint run -E gosec ./...
-  - name: snyk scan
-    image: gordonpn/snyk-cli-drone
-    environment:
-      SNYK_TOKEN:
-        from_secret: SNYK_TOKEN
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - echo "Scan Docker images with Snyk"
-      # - snyk test --docker gordonpn/hotdeals-mailer:latest --file=Dockerfile --exclude-base-image-vulns
-      # - snyk test --docker gordonpn/hotdeals-scraper:latest --file=Dockerfile --exclude-base-image-vulns
+- name: gosec scan
+  image: golangci/golangci-lint
+  commands:
+    - cd /drone/src/scraper
+    - go get
+    - golangci-lint run -E gosec ./...
+    - cd /drone/src/mailer
+    - go get
+    - golangci-lint run -E gosec ./...
+    - cd /drone/src/backend
+    - go get
+    - golangci-lint run -E gosec ./...
+- name: snyk scan
+  image: gordonpn/snyk-cli-drone
+  environment:
+    SNYK_TOKEN:
+      from_secret: SNYK_TOKEN
+  volumes:
+  - name: dockersock
+    path: /var/run/docker.sock
+  commands:
+  - echo "Scan Docker images with Snyk"
 
 volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
+- name: dockersock
+  host:
+    path: /var/run/docker.sock
 ---
 kind: pipeline
 type: docker
@@ -200,40 +200,40 @@ trigger:
   branch: [ master ]
 
 steps:
-  - name: deploy prod
-    image: docker/compose:1.25.5
-    environment:
-      TZ: America/Montreal
-      MAILER_HC_UUID:
-        from_secret: MAILER_HC_UUID
-      POSTGRES_DB:
-        from_secret: POSTGRES_DB
-      POSTGRES_NONROOT_DB:
-        from_secret: POSTGRES_NONROOT_DB
-      POSTGRES_NONROOT_PASSWORD:
-        from_secret: POSTGRES_NONROOT_PASSWORD
-      POSTGRES_NONROOT_USER:
-        from_secret: POSTGRES_NONROOT_USER
-      POSTGRES_PASSWORD:
-        from_secret: POSTGRES_PASSWORD
-      POSTGRES_USER:
-        from_secret: POSTGRES_USER
-      SCRAPER_HC_UUID:
-        from_secret: SCRAPER_HC_UUID
-      SENDGRID_API_KEY:
-        from_secret: SENDGRID_API_KEY
-      SENDGRID_TEMPLATE:
-        from_secret: SENDGRID_TEMPLATE
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - /drone/src/.docker/scripts/deploy_prod.sh
+- name: deploy prod
+  image: docker/compose:1.25.5
+  environment:
+    TZ: America/Montreal
+    MAILER_HC_UUID:
+      from_secret: MAILER_HC_UUID
+    POSTGRES_DB:
+      from_secret: POSTGRES_DB
+    POSTGRES_NONROOT_DB:
+      from_secret: POSTGRES_NONROOT_DB
+    POSTGRES_NONROOT_PASSWORD:
+      from_secret: POSTGRES_NONROOT_PASSWORD
+    POSTGRES_NONROOT_USER:
+      from_secret: POSTGRES_NONROOT_USER
+    POSTGRES_PASSWORD:
+      from_secret: POSTGRES_PASSWORD
+    POSTGRES_USER:
+      from_secret: POSTGRES_USER
+    SCRAPER_HC_UUID:
+      from_secret: SCRAPER_HC_UUID
+    SENDGRID_API_KEY:
+      from_secret: SENDGRID_API_KEY
+    SENDGRID_TEMPLATE:
+      from_secret: SENDGRID_TEMPLATE
+  volumes:
+  - name: dockersock
+    path: /var/run/docker.sock
+  commands:
+  - /drone/src/.docker/scripts/deploy_prod.sh
 
 volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
+- name: dockersock
+  host:
+    path: /var/run/docker.sock
 
 ---
 kind: pipeline
@@ -244,26 +244,24 @@ trigger:
   event: [ push, pull_request ]
 
 steps:
-  - name: slack after
-    image: plugins/slack
-    failure: ignore
-    settings:
-      channel: drone-ci
-      template: >
-        {{repo.name}}:
-        {{#success build.status}}
-        build #{{build.number}} succeeded
-        {{else}}
-        build #{{build.number}} failed
-        {{/success}}
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-    when:
-      status: [ success, failure ]
+- name: slack after
+  image: plugins/slack
+  failure: ignore
+  settings:
+    channel: drone-ci
+    template: >
+      {{repo.name}}:
+      {{#success build.status}}
+      build #{{build.number}} succeeded
+      {{else}}
+      build #{{build.number}} failed
+      {{/success}}
+    webhook:
+      from_secret: SLACK_WEBHOOK_URL
 
 depends_on:
-  - build
-  - test
-  - build and publish docker image
-  - security
-  - deploy
+- build
+- test
+- build and publish docker image
+- security
+- deploy
