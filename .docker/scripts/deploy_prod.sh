@@ -1,5 +1,6 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+echo "Not implemented"
+exit 1
 docker container stop hotdeals_postgres-dev || true
 docker container stop hotdeals_scraper-dev || true
 docker container stop hotdeals_mailer-dev || true

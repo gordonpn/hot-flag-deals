@@ -22,7 +22,7 @@ func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) 
 		votesSkewness       float64
 		votesSlice          []int
 		votesStandDev       float64
-		votesThresholdCoeff = 4.0
+		votesThresholdCoeff = 3.0
 	)
 	for _, thread := range threads {
 		viewsSlice = append(viewsSlice, thread.Views)
