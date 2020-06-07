@@ -143,7 +143,7 @@ steps:
   - name: dockersock
     path: /var/run/docker.sock
   commands:
-  - /drone/src/.docker/scripts/build.sh
+  - /drone/src/docker/scripts/build.sh
 
 volumes:
 - name: dockersock
@@ -228,7 +228,7 @@ steps:
   - name: dockersock
     path: /var/run/docker.sock
   commands:
-  - /drone/src/.docker/scripts/deploy_prod.sh
+  - /drone/src/docker/scripts/deploy_prod.sh
 
 volumes:
 - name: dockersock
