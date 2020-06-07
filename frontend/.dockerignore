@@ -1,0 +1,7 @@
+.idea/
+.next/
+node_modules/
+.eslintrc.json
+.gitignore
+.stylelintrc.json
+README.md
