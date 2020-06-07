@@ -163,7 +163,7 @@ depends_on:
 - build and publish docker image
 
 steps:
-- name: gosec scan
+- name: golangci-lint
   image: golangci/golangci-lint
   commands:
     - cd /drone/src/scraper
