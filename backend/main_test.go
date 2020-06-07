@@ -17,7 +17,6 @@ func init() {
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn("Problem with loading .env file")
 	}
-	log.SetLevel(log.DebugLevel)
 }
 
 func TestMain(m *testing.M) {

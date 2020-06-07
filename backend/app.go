@@ -17,11 +17,13 @@ type App struct {
 }
 
 func init() {
+	formatter := &log.TextFormatter{FullTimestamp: true}
+	log.SetFormatter(formatter)
+	log.SetLevel(log.DebugLevel)
 	err := godotenv.Load()
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn("Problem with loading .env file")
 	}
-	log.SetLevel(log.DebugLevel)
 }
 
 func (a *App) Initialize(user, password, dbname string) {
@@ -41,11 +43,30 @@ func (a *App) Run(addr string) {
 }
 
 func (a *App) handleDeals() http.HandlerFunc {
-	threads, err := getThreads(a.DB)
-	return getThreadsHandler(threads, err)
+	return func(w http.ResponseWriter, r *http.Request) {
+		threads, err := getThreads(a.DB)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		respondWithJSON(w, http.StatusOK, threads)
+	}
+}
+
+func (a *App) handleHealthCheck() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := a.DB.Ping()
+		if err != nil {
+			respondWithJSON(w, http.StatusInternalServerError, map[string]string{"message": "not ok"})
+			log.Error(err.Error())
+			return
+		}
+		respondWithJSON(w, http.StatusOK, map[string]string{"message": "ok"})
+	}
 }
 
 func (a *App) initializeRoutes() {
 	apiRoute := a.Router.PathPrefix("/api/v1").Subrouter()
 	apiRoute.HandleFunc("/deals", a.handleDeals()).Methods("GET")
+	apiRoute.HandleFunc("/healthcheck", a.handleHealthCheck()).Methods("GET")
 }
