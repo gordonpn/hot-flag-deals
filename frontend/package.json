@@ -16,10 +16,12 @@
     "babel-plugin-styled-components": "^1.10.7",
     "clsx": "latest",
     "express": "^4.17.1",
+    "formik": "^2.1.4",
+    "formik-material-ui": "^2.0.0-beta.1",
+    "http-proxy-middleware": "^1.0.4",
     "next": "latest",
     "prop-types": "latest",
     "react": "latest",
-    "http-proxy-middleware": "^1.0.4",
     "react-dom": "latest"
   },
   "devDependencies": {
