@@ -17,7 +17,7 @@ type thread struct {
 }
 
 func getThreads(db *sql.DB) ([]thread, error) {
-	sqlStatement := `SELECT * FROM threads WHERE date_posted > CURRENT_TIMESTAMP - INTERVAL '3 day';`
+	sqlStatement := `SELECT * FROM threads WHERE date_posted > CURRENT_TIMESTAMP - INTERVAL '2 day' AND votes > 0;`
 
 	rows, err := db.Query(sqlStatement)
 

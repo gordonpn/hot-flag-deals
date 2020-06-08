@@ -35,12 +35,18 @@
       "version": "detect"
     }
   },
-  "plugins": [
-    "prettier",
-    "react"
-  ],
+  "plugins": ["prettier", "react"],
   "rules": {
-    "react/react-in-jsx-scope": "off",
-    "prettier/prettier": "error"
+    "import/default": "off",
+    "import/extensions": "off",
+    "import/named": "off",
+    "import/namespace": "off",
+    "import/no-duplicates": "off",
+    "import/no-named-as-default": "off",
+    "import/no-named-as-default-member": "off",
+    "import/no-unresolved": "off",
+    "import/order": "off",
+    "prettier/prettier": "error",
+    "react/react-in-jsx-scope": "off"
   }
 }
