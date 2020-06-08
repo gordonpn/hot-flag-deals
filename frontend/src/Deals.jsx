@@ -1,9 +1,8 @@
-import { makeStyles } from "@material-ui/core/styles";
 import {
   CircularProgress,
+  Divider,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Paper,
   Typography,
@@ -11,20 +10,11 @@ import {
 import React, { useEffect, useState } from "react";
 import Axios from "axios";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    // maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
-
 function ListItemLink(props) {
   return <ListItem button component="a" {...props} />;
 }
 
 export default function Deals() {
-  const classes = useStyles();
   const [isLoading, setLoading] = useState(true);
   const [state, setState] = useState([]);
 
@@ -42,40 +32,36 @@ export default function Deals() {
     fetchData();
   }, []);
 
+  const getData = state.map((item) => {
+    return (
+      <div key={item.id}>
+        <ListItemLink
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ListItemText primary={item.title} secondary={`+${item.votes}`} />
+        </ListItemLink>
+        <Divider variant="middle" />
+      </div>
+    );
+  });
+
   return (
     <>
       <Typography variant="h4" component="h4" gutterBottom>
         Deals from the last 48 hours
       </Typography>
       <Paper elevation={24}>
-        {isLoading ? (
-          <List dense>
-            <ListItemIcon>
+        <List dense>
+          {isLoading ? (
+            <ListItem>
               <CircularProgress />
-            </ListItemIcon>
-          </List>
-        ) : (
-          <>
-            <List dense>
-              {state.map((item) => {
-                return (
-                  <div key={item.id}>
-                    <ListItemLink
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ListItemText
-                        primary={item.title}
-                        secondary={`+${item.votes}`}
-                      />
-                    </ListItemLink>
-                  </div>
-                );
-              })}
-            </List>
-          </>
-        )}
+            </ListItem>
+          ) : (
+            <>{getData}</>
+          )}
+        </List>
       </Paper>
     </>
   );
