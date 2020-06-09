@@ -1,11 +1,4 @@
 import Copyright from "../src/Copyright";
-import {
-  Box,
-  Button,
-  Container,
-  LinearProgress,
-  Typography,
-} from "@material-ui/core";
 import React, { useState } from "react";
 import Header from "../src/Header";
 import Spacer from "../src/Spacer";
@@ -16,6 +9,12 @@ import MuiLink from "@material-ui/core/Link";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ReCAPTCHA from "react-google-recaptcha";
 import * as Yup from "yup";
+import Link from "next/link";
+import Container from "@material-ui/core/Container";
+import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles(() => ({
   alignItemsAndJustifyContent: {
@@ -39,10 +38,15 @@ export default function Subscribe() {
       <Box my={4}>
         <Header />
         <Spacer />
-        <Typography variant="subtitle2" gutterBottom>
-          <ArrowBackIcon color="primary" style={{ verticalAlign: "middle" }} />
-          <MuiLink href="/">{` Go back to the deals. `}</MuiLink>
-        </Typography>
+        <Link href="/">
+          <Typography color="primary" variant="subtitle2" gutterBottom>
+            <ArrowBackIcon
+              color="primary"
+              style={{ verticalAlign: "middle" }}
+            />
+            <MuiLink>{` Go back to the deals. `}</MuiLink>
+          </Typography>
+        </Link>
         {submitted && (
           <>
             <Spacer />

@@ -1,14 +1,12 @@
-import {
-  CircularProgress,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Typography,
-} from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import Axios from "axios";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Divider from "@material-ui/core/Divider";
+import Typography from "@material-ui/core/Typography";
+import Paper from "@material-ui/core/Paper";
+import List from "@material-ui/core/List";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 function ListItemLink(props) {
   return <ListItem button component="a" {...props} />;
@@ -20,14 +18,17 @@ export default function Deals() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await Axios.get("/api/v1/deals");
-      const data = [];
-      result.data.forEach((item) => {
-        data.push(item);
-      });
-      data.sort((a, b) => (a.votes < b.votes ? 1 : -1));
-      setState(data);
-      setLoading(false);
+      await Axios.get("/api/v1/deals")
+        .then((response) => {
+          const data = [];
+          response.data.forEach((item) => {
+            data.push(item);
+          });
+          data.sort((a, b) => (a.votes < b.votes ? 1 : -1));
+          setState(data);
+          setLoading(false);
+        })
+        .catch(() => {});
     };
     fetchData();
   }, []);
