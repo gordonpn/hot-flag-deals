@@ -5,20 +5,17 @@ import Spacer from "../src/Spacer";
 import { Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
 import { makeStyles } from "@material-ui/core/styles";
-import MuiLink from "@material-ui/core/Link";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ReCAPTCHA from "react-google-recaptcha";
 import * as Yup from "yup";
-import Link from "next/link";
 import Container from "@material-ui/core/Container";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Button from "@material-ui/core/Button";
+import GoBack from "../src/GoBack";
 
 const useStyles = makeStyles(() => ({
   alignItemsAndJustifyContent: {
-    width: 720,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -38,15 +35,7 @@ export default function Subscribe() {
       <Box my={4}>
         <Header />
         <Spacer />
-        <Link href="/">
-          <Typography color="primary" variant="subtitle2" gutterBottom>
-            <ArrowBackIcon
-              color="primary"
-              style={{ verticalAlign: "middle" }}
-            />
-            <MuiLink>{` Go back to the deals. `}</MuiLink>
-          </Typography>
-        </Link>
+        <GoBack />
         {submitted && (
           <>
             <Spacer />
@@ -80,6 +69,7 @@ export default function Subscribe() {
               setSubmitted(true);
               setName(values.name);
               setSubmitting(false);
+              //  todo make call to backend with email
             }}
           >
             {({ errors, touched, submitForm, isSubmitting, setFieldValue }) => (
