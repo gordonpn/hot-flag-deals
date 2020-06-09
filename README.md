@@ -25,13 +25,41 @@ With this project, I saved myself the chore of checking the (messy) forum a few 
 
 Base template design by [@tiffzeng](https://github.com/tiffzeng)
 
+## How It Works
+
+The project is split into several services:
+
+* Scraper
+
+  Scrapes the forums periodically and depends on the database to persist the data.
+
+* Mailer
+
+  Sends the daily newsletter email.
+
+* Backend
+
+  RESTful API, takes care of sending data to the frontend and managing subscribing and unsubscribing.
+
+* Frontend
+
+  Displays the deals nicely, and has the subscription form.
+
+* Proxy
+
+  Forwards requests to the right service.
+
 ## Built with / technologies
 
 * Go programming language
 * SendGrid
-* Docker
+* Docker & Docker Swarm
 * PostgreSQL
 * Drone CI
+* Nginx
+* Next.js
+* React.js
+* Material-UI
 
 ## Features
 
@@ -39,6 +67,7 @@ Base template design by [@tiffzeng](https://github.com/tiffzeng)
 * Insert and update a database
 * Automated newsletter email
 * Algorithm to filter the junk
+* Website to browse the deals and subscribe to the emails
 
 ## Getting started
 
@@ -47,6 +76,7 @@ Base template design by [@tiffzeng](https://github.com/tiffzeng)
 * Go(lang) v1.14+
 * Docker-compose v1.25.5+
 * Docker v19.03+
+* Node.js v14+
 
 ### Configuration
 

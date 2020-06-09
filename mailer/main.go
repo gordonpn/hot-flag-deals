@@ -20,9 +20,7 @@ const (
 
 func main() {
 	_, present := os.LookupEnv("DEV")
-	if present {
-		job()
-	} else {
+	if !present {
 		scheduler := clockwork.NewScheduler()
 		scheduler.SetPollingInterval(30 * 60000)
 		scheduler.Schedule().Every().Day().At("10:00").Do(job)
