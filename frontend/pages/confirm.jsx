@@ -10,7 +10,7 @@ import GoBack from "../src/GoBack";
 import * as Yup from "yup";
 
 const schema = Yup.object().shape({
-  email: Yup.string().email(),
+  email: Yup.string().email().lowercase().trim(),
 });
 
 export default function Confirm() {

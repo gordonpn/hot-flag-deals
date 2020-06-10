@@ -25,6 +25,18 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+const signUpSchema = Yup.object().shape({
+  name: Yup.string()
+    .matches(/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/, "Invalid name")
+    .trim(),
+  email: Yup.string()
+    .email("Invalid email")
+    .required("Email required")
+    .lowercase()
+    .trim(),
+  recaptcha: Yup.string().required("recaptcha required").ensure(),
+});
+
 export default function Subscribe() {
   const classes = useStyles();
   const [submitted, setSubmitted] = useState(false);
@@ -55,16 +67,7 @@ export default function Subscribe() {
               email: "",
               recaptcha: "",
             }}
-            validationSchema={Yup.object().shape({
-              name: Yup.string().matches(
-                /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
-                "Invalid name"
-              ),
-              email: Yup.string()
-                .email("Invalid email")
-                .required("Email required"),
-              recaptcha: Yup.string().required("recaptcha required"),
-            })}
+            validationSchema={signUpSchema}
             onSubmit={(values, { setSubmitting }) => {
               setSubmitted(true);
               setName(values.name);
