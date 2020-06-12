@@ -7,6 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import List from "@material-ui/core/List";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { makeStyles } from "@material-ui/core/styles";
 
 function ListItemLink(props) {
   return <ListItem button component="a" {...props} />;
@@ -41,7 +42,15 @@ export default function Deals() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <ListItemText primary={item.title} secondary={`+${item.votes}`} />
+          <ListItemText
+            disableTypography
+            primary={
+              <Typography type="body2" style={{ fontWeight: 500 }}>
+                {item.title}
+              </Typography>
+            }
+            secondary={`+${item.votes}`}
+          />
         </ListItemLink>
         <Divider variant="middle" />
       </div>

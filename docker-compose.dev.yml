@@ -20,7 +20,7 @@ services:
   backend:
     container_name: hotdeals-backend-dev
     environment:
-      NODE_ENV=development
+      - NODE_ENV=development
     ports:
       - "127.0.0.1:8080:8080"
 

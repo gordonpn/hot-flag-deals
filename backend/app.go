@@ -70,3 +70,4 @@ func (a *App) initializeRoutes() {
 	apiRoute.HandleFunc("/deals", a.handleDeals()).Methods("GET")
 	apiRoute.HandleFunc("/healthcheck", a.handleHealthCheck()).Methods("GET")
 }
+// todo add more logging
