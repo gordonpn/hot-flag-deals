@@ -40,3 +40,27 @@ services:
       - TZ=America/Montreal
     depends_on:
       - postgres
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - TZ=America/Montreal
+      - POSTGRES_NONROOT_USER
+      - POSTGRES_NONROOT_PASSWORD
+      - POSTGRES_NONROOT_DB
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - TZ=America/Montreal
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - postgres

@@ -32,7 +32,7 @@ app
       if (err) {
         throw err;
       }
-      console.log(`> Ready on port ${port} [${env}]`);
+      console.log(`Ready on port ${port} [${env}]`);
     });
   })
   .catch((err) => {

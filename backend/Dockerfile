@@ -1,6 +1,6 @@
 FROM golang:1.14-alpine AS builder
-ARG TARGETARCH
-ARG TARGETOS
+ARG TARGETARCH=amd64
+ARG TARGETOS=linux
 RUN test -n "$TARGETARCH"
 RUN test -n "$TARGETOS"
 RUN echo "Building for $TARGETOS $TARGETARCH"

@@ -17,6 +17,18 @@ services:
     environment:
       - DEV
 
+  backend:
+    container_name: hotdeals-backend-dev
+    environment:
+      NODE_ENV=development
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  frontend:
+    container_name: hotdeals-frontend-dev
+    ports:
+      - "127.0.0.1:3000:3000"
+
 volumes:
   dev-postgres-hotdeals:
     external:

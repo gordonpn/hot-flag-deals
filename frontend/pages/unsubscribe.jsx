@@ -7,11 +7,7 @@ import Spacer from "../src/Spacer";
 import Copyright from "../src/Copyright";
 import Typography from "@material-ui/core/Typography";
 import GoBack from "../src/GoBack";
-import * as Yup from "yup";
-
-const schema = Yup.object().shape({
-  email: Yup.string().email().lowercase().trim(),
-});
+import { schema } from "./confirm";
 
 export default function Unsubscribe() {
   const router = useRouter();

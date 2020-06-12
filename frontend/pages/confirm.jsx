@@ -9,7 +9,7 @@ import Typography from "@material-ui/core/Typography";
 import GoBack from "../src/GoBack";
 import * as Yup from "yup";
 
-const schema = Yup.object().shape({
+export const schema = Yup.object().shape({
   email: Yup.string().email().lowercase().trim(),
 });
 
