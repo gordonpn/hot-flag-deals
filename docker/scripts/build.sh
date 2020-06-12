@@ -8,3 +8,5 @@ cd /drone/src/mailer || exit 1
 docker buildx build -t gordonpn/hotdeals-mailer:latest --platform linux/amd64,linux/arm64 --push .
 cd /drone/src/scraper || exit 1
 docker buildx build -t gordonpn/hotdeals-scraper:latest --platform linux/amd64,linux/arm64 --push .
+# todo buld for backend, frontend and proxy
+# todo tag appropriately stable vs latest

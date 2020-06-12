@@ -9,7 +9,12 @@ export default function GoBack() {
   return (
     <Box width="25%">
       <Link href="/">
-        <Typography color="primary" variant="subtitle2" gutterBottom>
+        <Typography
+          color="primary"
+          variant="subtitle2"
+          gutterBottom
+          style={{ cursor: "pointer" }}
+        >
           <ArrowBackIcon color="primary" style={{ verticalAlign: "middle" }} />
           <MuiLink>{` Go back to the deals. `}</MuiLink>
         </Typography>

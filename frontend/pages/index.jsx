@@ -17,7 +17,11 @@ export default function Index() {
         <Header />
         <Spacer />
         <Link href="/subscribe">
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography
+            variant="subtitle2"
+            gutterBottom
+            style={{ cursor: "pointer" }}
+          >
             <EmailIcon color="primary" style={{ verticalAlign: "middle" }} />
             <MuiLink>
               {` Want to get these deals in your inbox every morning? Click to
