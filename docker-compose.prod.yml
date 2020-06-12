@@ -105,9 +105,38 @@ services:
     image: gordonpn/hotdeals-frontend:latest
     networks:
       - hotdeals-network
-      - traefik-public
     expose:
       - 3000
+    healthcheck:
+      test: curl --fail -s http://localhost:3000/ || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m30s
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  proxy:
+    container_name: hotdeals-proxy
+    image: gordonpn/hotdeals-proxy:latest
+    networks:
+      - traefik-public
+      - hotdeals-network
+    expose:
+      - 80
     healthcheck:
       test: curl --fail -s http://localhost:3000/ || exit 1
       interval: 1m30s
