@@ -118,7 +118,7 @@ volumes:
 ---
 kind: pipeline
 type: docker
-name: build and publish docker image
+name: build and publish docker image latest
 
 platform:
   os: linux
@@ -149,7 +149,40 @@ volumes:
 - name: dockersock
   host:
     path: /var/run/docker.sock
+---
+kind: pipeline
+type: docker
+name: build and publish docker image stable
 
+platform:
+  os: linux
+  arch: amd64
+
+depends_on:
+- build
+- test
+
+trigger:
+  event: [ push, pull_request ]
+  branch: [ master ]
+
+steps:
+- name: publish
+  image: gordonpn/docker-buildx-drone
+  environment:
+    DOCKER_TOKEN:
+      from_secret: DOCKER_TOKEN
+    DOCKER_TAG: stable
+  volumes:
+  - name: dockersock
+    path: /var/run/docker.sock
+  commands:
+  - /drone/src/docker/scripts/build.sh
+
+volumes:
+- name: dockersock
+  host:
+    path: /var/run/docker.sock
 ---
 kind: pipeline
 type: docker
@@ -160,7 +193,7 @@ trigger:
   branch: [ develop ]
 
 depends_on:
-- build and publish docker image
+- build and publish docker image latest
 
 steps:
 - name: golangci-lint
@@ -185,6 +218,7 @@ steps:
     path: /var/run/docker.sock
   commands:
   - echo "Scan Docker images with Snyk"
+  # TODO snyk scan docker image
 
 volumes:
 - name: dockersock
@@ -196,8 +230,11 @@ type: docker
 name: deploy
 
 trigger:
-  event: [ push ]
+  event: [ push, pull_request ]
   branch: [ master ]
+
+depends_on:
+  - build and publish docker image stable
 
 steps:
 - name: deploy prod
@@ -262,6 +299,7 @@ steps:
 depends_on:
 - build
 - test
-- build and publish docker image
+- build and publish docker image stable
+- build and publish docker image latest
 - security
 - deploy

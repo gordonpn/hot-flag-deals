@@ -23,7 +23,7 @@ export default function Unsubscribe() {
         .then((value) => {
           if (value) {
             setMessage("You've been unsubscribed.");
-            //  todo make call to backend with email
+            //  TODO make call to backend with email
           } else {
             setMessage("Something went wrong.");
           }

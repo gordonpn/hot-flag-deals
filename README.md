@@ -108,7 +108,7 @@ Bring the services up using docker-compose.
 
 `go test`
 
-## Roadmap / Todo
+## Roadmap
 
 Check out the [open issues](https://github.com/gordonpn/hot-flag-deals/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) for ideas and features I have planned!
 

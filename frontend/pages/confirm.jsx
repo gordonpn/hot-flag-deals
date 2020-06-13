@@ -27,7 +27,7 @@ export default function Confirm() {
         .then((value) => {
           if (value) {
             setMessage("Thank you for confirming your subscription!");
-            //  todo make call to backend with email
+            //  TODO make call to backend with email
           } else {
             setMessage("Something went wrong.");
           }

@@ -72,7 +72,7 @@ export default function Subscribe() {
               setSubmitted(true);
               setName(values.name);
               setSubmitting(false);
-              //  todo make call to backend with email
+              //  TODO make call to backend with email
             }}
           >
             {({ errors, touched, submitForm, isSubmitting, setFieldValue }) => (
