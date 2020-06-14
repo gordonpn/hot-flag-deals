@@ -7,6 +7,11 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
 
+  redis:
+    container_name: hotdeals-redis-dev
+    ports:
+      - "127.0.0.1:6379:6379"
+
   scraper:
     container_name: hotdeals_scraper-dev
     environment:

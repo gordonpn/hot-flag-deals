@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -15,6 +16,7 @@ import (
 type App struct {
 	Router *mux.Router
 	DB     *sql.DB
+	RDB    *redis.Client
 }
 
 func init() {
@@ -35,6 +37,7 @@ func (a *App) Initialize(user, password, dbname string) {
 	port := 5432
 	pgURI := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	connectDB(a, pgURI)
+	connectRedis(a)
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
 }
@@ -46,9 +49,10 @@ func (a *App) Run(addr string) {
 func (a *App) handleDeals() http.HandlerFunc {
 	log.Debug("Deals API endpoint registered")
 	return func(w http.ResponseWriter, r *http.Request) {
-		threads, err := getThreads(a.DB)
+		threads, err := getThreads(a)
 		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
+			respondWithError(w, http.StatusInternalServerError, "an error has occurred")
+			log.Error(err.Error())
 			return
 		}
 		respondWithJSON(w, http.StatusOK, threads)

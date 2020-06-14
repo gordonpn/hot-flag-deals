@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
+	"os"
 	"time"
 )
 
@@ -29,4 +32,25 @@ func connectDB(a *App, pgURI string) {
 		log.Fatal("Could not connect to DB")
 	}
 	log.Info("Successfully connected to DB")
+}
+
+func connectRedis(a *App) {
+	host, exists := os.LookupEnv("REDIS_HOST")
+	if !exists {
+		host = "redis"
+	}
+
+	addr := fmt.Sprintf("%s:6379", host)
+	var ctx = context.Background()
+	a.RDB = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: "",
+		DB:       0,
+	})
+	_, err := a.RDB.Ping(ctx).Result()
+	if err != nil {
+		log.WithFields(log.Fields{"err": err}).Error("Error with opening connection with Redis")
+		panic(err)
+	}
+	log.Info("Successfully connected to Redis")
 }

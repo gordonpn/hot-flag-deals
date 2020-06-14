@@ -13,6 +13,10 @@ services:
     volumes:
       - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+
   scraper:
     build:
       context: ./scraper
@@ -53,6 +57,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
 
   frontend:
     build:
@@ -64,6 +69,7 @@ services:
     depends_on:
       - backend
       - postgres
+      - redis
 
   proxy:
     build:

@@ -27,6 +27,31 @@ services:
         constraints:
           - node.labels.main-node == true
 
+  redis:
+    container_name: hotdeals-redis
+    expose:
+      - 6379
+    networks:
+      - hotdeals-network
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.labels.main-node == true
+
   scraper:
     container_name: hotdeals_scraper
     image: gordonpn/hotdeals-scraper:stable
