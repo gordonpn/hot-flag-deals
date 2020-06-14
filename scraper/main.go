@@ -24,7 +24,8 @@ type thread struct {
 	Votes      int
 	Views      int
 	DatePosted time.Time
-	Seen       bool
+  Seen       bool
+  Notified   bool
 }
 
 const (
@@ -111,6 +112,7 @@ func getPosts() (threads []thread) {
 			tempThread.Views = views
 			tempThread.DatePosted = datetime
 			tempThread.Seen = false
+			tempThread.Notified = false
 
 			threads = append(threads, tempThread)
 		})
@@ -170,8 +172,8 @@ func upsertIntoDB(threads []thread) {
 	).Debug("Length and capacity of threads")
 
 	for _, thread := range threads {
-    sqlStatement := `INSERT INTO threads (id, title, link, posts, votes, views, date_posted, seen)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    sqlStatement := `INSERT INTO threads (id, title, link, posts, votes, views, date_posted, seen, notified)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     ON CONFLICT (id)
     DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
 

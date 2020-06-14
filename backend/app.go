@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -43,6 +44,7 @@ func (a *App) Run(addr string) {
 }
 
 func (a *App) handleDeals() http.HandlerFunc {
+	log.Debug("Deals API endpoint registered")
 	return func(w http.ResponseWriter, r *http.Request) {
 		threads, err := getThreads(a.DB)
 		if err != nil {
@@ -54,6 +56,7 @@ func (a *App) handleDeals() http.HandlerFunc {
 }
 
 func (a *App) handleHealthCheck() http.HandlerFunc {
+	log.Debug("Healthcheck API endpoint registered")
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := a.DB.Ping()
 		if err != nil {
@@ -65,9 +68,66 @@ func (a *App) handleHealthCheck() http.HandlerFunc {
 	}
 }
 
+func (a *App) handleSubscribe() http.HandlerFunc {
+	log.Debug("Subscribe API endpoint registered")
+	return func(w http.ResponseWriter, r *http.Request) {
+		var s subscriber
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&s); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+			return
+		}
+		defer r.Body.Close()
+		if err := s.createSubscriber(a.DB); err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		respondWithJSON(w, http.StatusCreated, s)
+	}
+}
+
+func (a *App) handleUnsubscribe() http.HandlerFunc {
+	log.Debug("Unsubscribe API endpoint registered")
+	return func(w http.ResponseWriter, r *http.Request) {
+		var s subscriber
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&s); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+			return
+		}
+		defer r.Body.Close()
+		if err := s.deleteSubscriber(a.DB); err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		respondWithJSON(w, http.StatusOK, s)
+	}
+}
+
+func (a *App) handleConfirm() http.HandlerFunc {
+	log.Debug("Confirm API endpoint registered")
+	return func(w http.ResponseWriter, r *http.Request) {
+		var s subscriber
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&s); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+			return
+		}
+		defer r.Body.Close()
+		if err := s.updateSubscriber(a.DB); err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		respondWithJSON(w, http.StatusOK, s)
+	}
+}
+
 func (a *App) initializeRoutes() {
 	apiRoute := a.Router.PathPrefix("/api/v1").Subrouter()
 	apiRoute.HandleFunc("/deals", a.handleDeals()).Methods("GET")
 	apiRoute.HandleFunc("/healthcheck", a.handleHealthCheck()).Methods("GET")
+	emailsRoute := apiRoute.PathPrefix("/emails").Subrouter()
+	emailsRoute.HandleFunc("/subscribe", a.handleSubscribe()).Methods("POST")
+	emailsRoute.HandleFunc("/unsubscribe", a.handleUnsubscribe()).Methods("DELETE")
+	emailsRoute.HandleFunc("/confirm", a.handleConfirm()).Methods("PUT")
 }
-// TODO add more logging

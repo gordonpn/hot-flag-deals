@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/gordonpn/hot-flag-deals/internal/database"
-	"github.com/gordonpn/hot-flag-deals/internal/filter"
+	"github.com/gordonpn/hot-flag-deals/pkg/database"
+	"github.com/gordonpn/hot-flag-deals/pkg/filter"
 	"net/http"
 	"os"
 

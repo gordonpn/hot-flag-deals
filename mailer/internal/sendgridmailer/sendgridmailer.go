@@ -2,8 +2,8 @@ package sendgridmailer
 
 import (
 	"fmt"
-	"github.com/gordonpn/hot-flag-deals/internal/data"
-	"github.com/gordonpn/hot-flag-deals/internal/database"
+	"github.com/gordonpn/hot-flag-deals/pkg/data"
+	"github.com/gordonpn/hot-flag-deals/pkg/database"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	log "github.com/sirupsen/logrus"

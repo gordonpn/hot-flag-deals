@@ -1,7 +1,7 @@
 package filter
 
 import (
-	types "github.com/gordonpn/hot-flag-deals/internal/data"
+	types "github.com/gordonpn/hot-flag-deals/pkg/data"
 	log "github.com/sirupsen/logrus"
 	"math"
 	"sort"
