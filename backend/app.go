@@ -131,7 +131,7 @@ func (a *App) initializeRoutes() {
 	apiRoute.HandleFunc("/deals", a.handleDeals()).Methods("GET")
 	apiRoute.HandleFunc("/healthcheck", a.handleHealthCheck()).Methods("GET")
 	emailsRoute := apiRoute.PathPrefix("/emails").Subrouter()
-	emailsRoute.HandleFunc("/subscribe", a.handleSubscribe()).Methods("POST")
-	emailsRoute.HandleFunc("/unsubscribe", a.handleUnsubscribe()).Methods("DELETE")
-	emailsRoute.HandleFunc("/confirm", a.handleConfirm()).Methods("PUT")
+	emailsRoute.HandleFunc("", a.handleSubscribe()).Methods("POST")
+	emailsRoute.HandleFunc("", a.handleUnsubscribe()).Methods("DELETE")
+	emailsRoute.HandleFunc("", a.handleConfirm()).Methods("PUT")
 }

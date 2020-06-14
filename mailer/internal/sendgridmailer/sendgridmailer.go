@@ -59,6 +59,7 @@ func getSubscribers() (subscribers []types.Subscriber) {
 }
 
 func getEmailBody(threads []types.Thread, subscriber types.Subscriber) []byte {
+  // TODO add link to unsubscribe
 	m := mail.NewV3Mail()
 
 	address := "deals@gordon-pn.com"

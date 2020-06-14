@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
@@ -24,8 +26,8 @@ type thread struct {
 
 type subscriber struct {
 	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
+	Name      string `json:"name" validate:"omitempty,name,max=128"`
+	Email     string `json:"email" validate:"required,email,max=128"`
 	Confirmed bool   `json:"confirmed"`
 }
 
@@ -42,15 +44,11 @@ func getThreads(a *App) ([]thread, error) {
 		}
 	}
 	sqlStatement := `SELECT * FROM threads WHERE date_posted > CURRENT_TIMESTAMP - INTERVAL '2 day' AND votes > 0;`
-
 	rows, err := a.DB.Query(sqlStatement)
-
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
-
 	var threads []thread
 	for rows.Next() {
 		tempThread := thread{}
@@ -71,11 +69,13 @@ func getThreads(a *App) ([]thread, error) {
 	}
 	redisThreads, err := json.Marshal(threads)
 	if err != nil {
-		log.Error(err)
+		log.Error(fmt.Sprintf("Error with marshalling threads: %v", err))
 	}
-	_, err = a.RDB.SetNX(ctx, "threads", redisThreads, time.Hour).Result()
-	if err != nil {
-		log.Error(err)
+	if err == nil {
+		_, err = a.RDB.SetNX(ctx, "threads", redisThreads, time.Hour).Result()
+		if err != nil {
+			log.Error(fmt.Sprintf("Error with saving to Redis: %v", err))
+		}
 	}
 	log.Debug("Returning data from database")
 	return threads, nil
@@ -83,7 +83,13 @@ func getThreads(a *App) ([]thread, error) {
 
 func (s *subscriber) createSubscriber(db *sql.DB) error {
 	log.Debug("Creating subscriber")
-	// TODO validate name and email
+	s.Name = strings.TrimSpace(s.Name)
+	s.Email = strings.TrimSpace(s.Email)
+	if err := s.Validate(); err != nil {
+		log.Error(fmt.Sprintf("Error with validating creating subscriber: %v", err))
+		return errors.New("an error has occurred")
+	}
+	// TODO send email to confirm
 	sqlQuery := `INSERT INTO subscribers (name, email)
     VALUES ($1, $2)
     ON CONFLICT (email)
@@ -92,7 +98,7 @@ func (s *subscriber) createSubscriber(db *sql.DB) error {
 	_, err := db.Exec(sqlQuery, s.Name, s.Email)
 
 	if err != nil {
-		log.Error(err)
+		log.Error(fmt.Sprintf("Error with creating subscriber: %v", err))
 		return errors.New("an error has occurred")
 	}
 	return nil
@@ -100,12 +106,16 @@ func (s *subscriber) createSubscriber(db *sql.DB) error {
 
 func (s *subscriber) deleteSubscriber(db *sql.DB) error {
 	log.Debug("Deleting subscriber")
-	// TODO validate email
+	s.Email = strings.TrimSpace(s.Email)
+	if err := s.Validate(); err != nil {
+		log.Error(fmt.Sprintf("Error with validating deleting subscriber: %v", err))
+		return errors.New("an error has occurred")
+	}
 	sqlQuery := `DELETE FROM subscribers WHERE email = $1`
 	_, err := db.Exec(sqlQuery, s.Email)
 
 	if err != nil {
-		log.Error(err)
+		log.Error(fmt.Sprintf("Error with deleting subscriber: %v", err))
 		return errors.New("an error has occurred")
 	}
 	return nil
@@ -113,12 +123,16 @@ func (s *subscriber) deleteSubscriber(db *sql.DB) error {
 
 func (s *subscriber) updateSubscriber(db *sql.DB) error {
 	log.Debug("Updating subscriber")
-	// TODO validate email
+	s.Email = strings.TrimSpace(s.Email)
+	if err := s.Validate(); err != nil {
+		log.Error(fmt.Sprintf("Error with validating updating subscriber: %v", err))
+		return errors.New("an error has occurred")
+	}
 	sqlQuery := `UPDATE subscribers SET confirmed = TRUE WHERE email = $1`
 	_, err := db.Exec(sqlQuery, s.Email)
 
 	if err != nil {
-		log.Error(err)
+		log.Error(fmt.Sprintf("Error with updating subscriber: %v", err))
 		return errors.New("an error has occurred")
 	}
 	return nil
