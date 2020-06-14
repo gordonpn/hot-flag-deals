@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development PORT=3000 node server.js",
     "build": "next build",
+    "preexport": "npm run build",
+    "export": "next export",
     "start": "next start",
     "prod": "cross-env NODE_ENV=production PORT=3000 node server.js"
   },
