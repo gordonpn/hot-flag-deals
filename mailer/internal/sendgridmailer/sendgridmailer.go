@@ -35,9 +35,7 @@ func getSubscribers() (subscribers []types.Subscriber) {
 	pgDatabase := database.GetDB()
 	db := pgDatabase.Database
 
-	sqlStatement := `
-  SELECT *
-  FROM subscribers;`
+	sqlStatement := `SELECT * FROM subscribers WHERE confirmed;`
 
 	subscribersRow, err := db.Query(sqlStatement)
 	warnErr(err)
@@ -48,6 +46,7 @@ func getSubscribers() (subscribers []types.Subscriber) {
 			&tempSub.ID,
 			&tempSub.Name,
 			&tempSub.Email,
+			&tempSub.Confirmed,
 		)
 		warnErr(err)
 		subscribers = append(subscribers, tempSub)

@@ -49,6 +49,7 @@ func RetrieveThreads() (threads []types.Thread) {
 			&tempThread.Views,
 			&tempThread.DatePosted,
 			&tempThread.Seen,
+			&tempThread.Notified,
 		)
 		warnErr(err)
 		threads = append(threads, tempThread)

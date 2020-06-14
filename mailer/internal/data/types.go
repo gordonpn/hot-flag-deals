@@ -3,9 +3,10 @@ package types
 import "time"
 
 type Subscriber struct {
-	ID    int
-	Name  string
-	Email string
+	ID        int
+	Name      string
+	Email     string
+	Confirmed bool
 }
 
 type Thread struct {
@@ -17,4 +18,5 @@ type Thread struct {
 	Views      int
 	DatePosted time.Time
 	Seen       bool
+	Notified   bool
 }
