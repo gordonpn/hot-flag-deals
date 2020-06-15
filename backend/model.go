@@ -90,7 +90,7 @@ func (s *subscriber) createSubscriber(db *sql.DB) error {
 		return errors.New("an error has occurred")
 	}
   // TODO send email to confirm
-  // https://deals.gordon-pn.com/confirm.html?email=gordon.pn6@gmail.com
+  // https://deals.gordon-pn.com/confirm?email=gordon.pn6@gmail.com
 	sqlQuery := `INSERT INTO subscribers (name, email)
     VALUES ($1, $2)
     ON CONFLICT (email)
