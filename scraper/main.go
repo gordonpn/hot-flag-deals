@@ -24,7 +24,8 @@ type thread struct {
 	Votes      int
 	Views      int
 	DatePosted time.Time
-	Seen       bool
+  Seen       bool
+  Notified   bool
 }
 
 const (
@@ -111,6 +112,7 @@ func getPosts() (threads []thread) {
 			tempThread.Views = views
 			tempThread.DatePosted = datetime
 			tempThread.Seen = false
+			tempThread.Notified = false
 
 			threads = append(threads, tempThread)
 		})
@@ -132,7 +134,7 @@ func getPosts() (threads []thread) {
 }
 
 func upsertIntoDB(threads []thread) {
-	host := "hotdeals_postgres"
+	host := "postgres"
 	port := 5432
 	user := os.Getenv("POSTGRES_NONROOT_USER")
 	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")
@@ -170,12 +172,12 @@ func upsertIntoDB(threads []thread) {
 	).Debug("Length and capacity of threads")
 
 	for _, thread := range threads {
-		sqlStatement := `
-	  INSERT INTO threads (id, title, link, posts, votes, views, date_posted, seen)
-	  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	  ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
+    sqlStatement := `INSERT INTO threads (id, title, link, posts, votes, views, date_posted)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    ON CONFLICT (id)
+    DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
 
-		_, err = db.Exec(sqlStatement, thread.ID, thread.Title, thread.Link, thread.Posts, thread.Votes, thread.Views, thread.DatePosted, thread.Seen)
+		_, err = db.Exec(sqlStatement, thread.ID, thread.Title, thread.Link, thread.Posts, thread.Votes, thread.Views, thread.DatePosted)
 		if err != nil {
 			log.WithFields(log.Fields{"Error": err}).Error("Problem with inserting")
 		}

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/gordonpn/hot-flag-deals/internal/database"
-	"github.com/gordonpn/hot-flag-deals/internal/filter"
+	"github.com/gordonpn/hot-flag-deals/pkg/database"
+	"github.com/gordonpn/hot-flag-deals/pkg/filter"
 	"net/http"
 	"os"
 
@@ -20,9 +20,7 @@ const (
 
 func main() {
 	_, present := os.LookupEnv("DEV")
-	if present {
-		job()
-	} else {
+	if !present {
 		scheduler := clockwork.NewScheduler()
 		scheduler.SetPollingInterval(30 * 60000)
 		scheduler.Schedule().Every().Day().At("10:00").Do(job)

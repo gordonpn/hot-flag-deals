@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	types "github.com/gordonpn/hot-flag-deals/internal/data"
+	types "github.com/gordonpn/hot-flag-deals/pkg/data"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
@@ -49,6 +49,7 @@ func RetrieveThreads() (threads []types.Thread) {
 			&tempThread.Views,
 			&tempThread.DatePosted,
 			&tempThread.Seen,
+			&tempThread.Notified,
 		)
 		warnErr(err)
 		threads = append(threads, tempThread)
@@ -85,7 +86,7 @@ func SetSeen(threads []types.Thread) {
 }
 
 func connectDB() *sql.DB {
-	host := "hotdeals_postgres"
+	host := "postgres"
 	port := 5432
 	user := os.Getenv("POSTGRES_NONROOT_USER")
 	password := os.Getenv("POSTGRES_NONROOT_PASSWORD")

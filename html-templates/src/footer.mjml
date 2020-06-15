@@ -5,5 +5,7 @@
       <mj-social-element href="https://gordon-pn.com" name="web"></mj-social-element>
     </mj-social>
     <mj-text align="center" font-size="13px" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"><a href="https://github.com/gordonpn/hot-flag-deals" class="link-nostyle" target="_blank">Check out the project on GitHub!</a></mj-text>
+    <mj-text align="center" font-size="9px" mj-class="body-text">Unsubscribe with one click:</mj-text>
+    <mj-text padding="0" align="center" font-size="9px" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"><a href="{{unsubscribeLink}}" class="link-nostyle" target="_blank">{{unsubscribeLink}}</a></mj-text>
   </mj-column>
 </mj-section>

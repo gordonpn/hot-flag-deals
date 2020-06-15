@@ -2,8 +2,8 @@ package sendgridmailer
 
 import (
 	"fmt"
-	"github.com/gordonpn/hot-flag-deals/internal/data"
-	"github.com/gordonpn/hot-flag-deals/internal/database"
+	"github.com/gordonpn/hot-flag-deals/pkg/data"
+	"github.com/gordonpn/hot-flag-deals/pkg/database"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	log "github.com/sirupsen/logrus"
@@ -35,9 +35,7 @@ func getSubscribers() (subscribers []types.Subscriber) {
 	pgDatabase := database.GetDB()
 	db := pgDatabase.Database
 
-	sqlStatement := `
-  SELECT *
-  FROM subscribers;`
+	sqlStatement := `SELECT * FROM subscribers WHERE confirmed;`
 
 	subscribersRow, err := db.Query(sqlStatement)
 	warnErr(err)
@@ -48,6 +46,7 @@ func getSubscribers() (subscribers []types.Subscriber) {
 			&tempSub.ID,
 			&tempSub.Name,
 			&tempSub.Email,
+			&tempSub.Confirmed,
 		)
 		warnErr(err)
 		subscribers = append(subscribers, tempSub)
@@ -82,7 +81,10 @@ func getEmailBody(threads []types.Thread, subscriber types.Subscriber) []byte {
 	dateNow := time.Now()
 	date := fmt.Sprintf("%s %d, %d", dateNow.Month(), dateNow.Day(), dateNow.Year())
 
+	unsubscribeLink := fmt.Sprintf("https://deals.gordon-pn.com/unsubscribe?email=%s", subscriber.Email)
+
 	p.SetDynamicTemplateData("date", date)
+	p.SetDynamicTemplateData("unsubscribeLink", unsubscribeLink)
 
 	var dealList []map[string]string
 	var deal map[string]string

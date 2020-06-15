@@ -1,7 +1,7 @@
 package filter
 
 import (
-	types "github.com/gordonpn/hot-flag-deals/internal/data"
+	types "github.com/gordonpn/hot-flag-deals/pkg/data"
 	log "github.com/sirupsen/logrus"
 	"math"
 	"sort"
@@ -22,7 +22,7 @@ func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) 
 		votesSkewness       float64
 		votesSlice          []int
 		votesStandDev       float64
-		votesThresholdCoeff = 4.0
+		votesThresholdCoeff = 3.0
 	)
 	for _, thread := range threads {
 		viewsSlice = append(viewsSlice, thread.Views)

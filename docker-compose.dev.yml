@@ -1,28 +1,47 @@
 version: '3.8'
 services:
-  hotdeals_postgres:
+  postgres:
     container_name: hotdeals_postgres-dev
     volumes:
       - dev-postgres-hotdeals:/var/lib/postgresql/data/
     ports:
-      - 5432
+      - "127.0.0.1:5432:5432"
 
-  hotdeals_scraper:
+  redis:
+    container_name: hotdeals-redis-dev
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  scraper:
     container_name: hotdeals_scraper-dev
     environment:
       - DEV
-    depends_on:
-      - hotdeals_postgres
 
-  hotdeals_mailer:
+  mailer:
     container_name: hotdeals_mailer-dev
     environment:
       - DEV
-    depends_on:
-      - hotdeals_postgres
+
+  backend:
+    container_name: hotdeals-backend-dev
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  frontend:
+    container_name: hotdeals-frontend-dev
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  proxy:
+    container_name: hotdeals-proxy-dev
+    ports:
+      - "127.0.0.1:4000:80"
 
 volumes:
   dev-postgres-hotdeals:
     external:
       name: dev-postgres-hotdeals
-

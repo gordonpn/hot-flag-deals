@@ -6,6 +6,7 @@ Software as a service scraping the [Hot Deals forums](https://forums.redflagdeal
 
 ---
 [![Build Status](https://drone.gordon-pn.com/api/badges/gordonpn/hot-flag-deals/status.svg)](https://drone.gordon-pn.com/gordonpn/hot-flag-deals)
+[![Uptime Robot](https://badgen.net/uptime-robot/status/m785314563-47a09fd2b0e8619f429b7a4f)](https://deals.gordon-pn.com)
 ![Healthchecks.io](https://healthchecks.io/badge/85143171-fec6-42e7-b3d8-bc7f499f5d0d/r5YwfK0Y.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gordonpn/hot-flag-deals)](https://goreportcard.com/report/github.com/gordonpn/hot-flag-deals)
 ![Last commit on develop](https://badgen.net/github/last-commit/gordonpn/hot-flag-deals/develop)
@@ -21,17 +22,56 @@ With this project, I saved myself the chore of checking the (messy) forum a few 
 
 ## Screenshot
 
+### Website
+
+![Website](./docs/website.png)
+
+### Newsletter
+
 <a href="./docs/newsletter.png"><img src="./docs/newsletter.png" height="900"></a>
 
-Base template design by [@tiffzeng](https://github.com/tiffzeng)
+Base email template design by [@tiffzeng](https://github.com/tiffzeng)
 
-## Built with / technologies
+## How It Works
+
+The project is split into several directories (services):
+
+* Scraper
+
+  Scrapes the forums periodically and depends on the database to persist the data.
+
+* Mailer
+
+  Sends the daily newsletter email.
+
+* Backend
+
+  REST API, takes care of sending data to the frontend and managing subscribing and unsubscribing.
+
+* Frontend
+
+  Displays the deals nicely, and provides the subscription form.
+
+* Proxy
+
+  Forwards requests to the right service.
+
+* HTML templates
+
+  Email templates built with mjml for the design of the newsletter emails and confirmation emails.
+
+## Built with / technologies used
 
 * Go programming language
 * SendGrid
-* Docker
+* Docker & Docker Swarm
 * PostgreSQL
+* Redis
 * Drone CI
+* Nginx
+* Next.js
+* React.js
+* Material-UI
 
 ## Features
 
@@ -39,6 +79,8 @@ Base template design by [@tiffzeng](https://github.com/tiffzeng)
 * Insert and update a database
 * Automated newsletter email
 * Algorithm to filter the junk
+* Website to browse the deals and subscribe to the emails
+* Confirmation email when a user subscribes
 
 ## Getting started
 
@@ -47,6 +89,7 @@ Base template design by [@tiffzeng](https://github.com/tiffzeng)
 * Go(lang) v1.14+
 * Docker-compose v1.25.5+
 * Docker v19.03+
+* Node.js v14+
 
 ### Configuration
 
@@ -54,6 +97,7 @@ Base template design by [@tiffzeng](https://github.com/tiffzeng)
 |---------------------------|------------------------------------------------------------------------------------------------------------|
 | SENDGRID_API_KEY          | SendGrid API key to use the service                                                                        |
 | SENDGRID_TEMPLATE         | SendGrid requires you to upload an html template to use for dynamic emails, this is the ID of the template |
+| SENDGRID_TEMPLATE_CONFIRM | SendGrid template ID for confirmation emails                                                               |
 | POSTGRES_NONROOT_DB       | Database for the appuser                                                                                   |
 | POSTGRES_DB               | Root database                                                                                              |
 | POSTGRES_USER             | Root username to initialize PostgreSQL                                                                     |
@@ -78,7 +122,7 @@ Bring the services up using docker-compose.
 
 `go test`
 
-## Roadmap / Todo
+## Roadmap
 
 Check out the [open issues](https://github.com/gordonpn/hot-flag-deals/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) for ideas and features I have planned!
 
