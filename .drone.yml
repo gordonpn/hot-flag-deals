@@ -232,7 +232,7 @@ type: docker
 name: deploy
 
 trigger:
-  event: [ push, pull_request ]
+  event: [ push ]
   branch: [ master ]
 
 depends_on:
