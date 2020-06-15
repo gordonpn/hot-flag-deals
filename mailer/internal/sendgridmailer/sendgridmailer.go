@@ -59,8 +59,6 @@ func getSubscribers() (subscribers []types.Subscriber) {
 }
 
 func getEmailBody(threads []types.Thread, subscriber types.Subscriber) []byte {
-  // TODO add link to unsubscribe
-  // https://deals.gordon-pn.com/unsubscribe?email=gordon.pn6@gmail.com
 	m := mail.NewV3Mail()
 
 	address := "deals@gordon-pn.com"
@@ -83,7 +81,10 @@ func getEmailBody(threads []types.Thread, subscriber types.Subscriber) []byte {
 	dateNow := time.Now()
 	date := fmt.Sprintf("%s %d, %d", dateNow.Month(), dateNow.Day(), dateNow.Year())
 
+	unsubscribeLink := fmt.Sprintf("https://deals.gordon-pn.com/unsubscribe?email=%s", subscriber.Email)
+
 	p.SetDynamicTemplateData("date", date)
+	p.SetDynamicTemplateData("unsubscribeLink", unsubscribeLink)
 
 	var dealList []map[string]string
 	var deal map[string]string
