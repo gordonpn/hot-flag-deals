@@ -13,6 +13,7 @@ import Typography from "@material-ui/core/Typography";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Button from "@material-ui/core/Button";
 import GoBack from "../src/GoBack";
+import axios from "axios";
 
 const useStyles = makeStyles(() => ({
   alignItemsAndJustifyContent: {
@@ -40,6 +41,7 @@ const signUpSchema = Yup.object().shape({
 export default function Subscribe() {
   const classes = useStyles();
   const [submitted, setSubmitted] = useState(false);
+  const [hadError, setHadError] = useState(false);
   const [name, setName] = useState("");
 
   return (
@@ -59,6 +61,14 @@ export default function Subscribe() {
             </Typography>
           </>
         )}
+        {hadError && (
+          <>
+            <Spacer />
+            <Typography color="primary" variant="subtitle1" gutterBottom>
+              Something went wrong.
+            </Typography>
+          </>
+        )}
         <Spacer />
         <div className={classes.alignItemsAndJustifyContent}>
           <Formik
@@ -69,10 +79,19 @@ export default function Subscribe() {
             }}
             validationSchema={signUpSchema}
             onSubmit={(values, { setSubmitting }) => {
-              setSubmitted(true);
-              setName(values.name);
-              setSubmitting(false);
-              //  TODO make call to backend with email
+              axios
+                .post("/api/v1/emails", {
+                  name: values.name,
+                  email: values.email,
+                })
+                .then(() => {
+                  setName(values.name);
+                  setSubmitted(true);
+                  setSubmitting(false);
+                })
+                .catch(() => {
+                  setHadError(true);
+                });
             }}
           >
             {({ errors, touched, submitForm, isSubmitting, setFieldValue }) => (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Axios from "axios";
+import axios from "axios";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Divider from "@material-ui/core/Divider";
@@ -7,7 +7,6 @@ import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import List from "@material-ui/core/List";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { makeStyles } from "@material-ui/core/styles";
 
 function ListItemLink(props) {
   return <ListItem button component="a" {...props} />;
@@ -19,7 +18,8 @@ export default function Deals() {
 
   useEffect(() => {
     const fetchData = async () => {
-      await Axios.get("/api/v1/deals")
+      await axios
+        .get("/api/v1/deals")
         .then((response) => {
           const data = [];
           response.data.forEach((item) => {

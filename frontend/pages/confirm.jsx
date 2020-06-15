@@ -8,6 +8,7 @@ import Copyright from "../src/Copyright";
 import Typography from "@material-ui/core/Typography";
 import GoBack from "../src/GoBack";
 import * as Yup from "yup";
+import axios from "axios";
 
 export const schema = Yup.object().shape({
   email: Yup.string().email().lowercase().trim(),
@@ -19,22 +20,27 @@ export default function Confirm() {
 
   useEffect(() => {
     const { email } = router.query;
-    if (email !== undefined) {
-      schema
-        .isValid({
-          email,
-        })
-        .then((value) => {
-          if (value) {
-            setMessage("Thank you for confirming your subscription!");
-            //  TODO make call to backend with email
-          } else {
-            setMessage("Something went wrong.");
-          }
-        });
-    } else {
-      setMessage("Something went wrong.");
+    if (email === undefined) {
+      return;
     }
+    schema
+      .isValid({
+        email,
+      })
+      .then((value) => {
+        if (value) {
+          axios
+            .put("/api/v1/emails", { email })
+            .then(() => {
+              setMessage("Thank you for confirming your subscription!");
+            })
+            .catch(() => {
+              setMessage("Something went wrong.");
+            });
+        } else {
+          setMessage("Something went wrong.");
+        }
+      });
   }, [router.query]);
 
   return (
