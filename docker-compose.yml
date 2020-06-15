@@ -11,7 +11,7 @@ services:
       - POSTGRES_USER
       - TZ=America/Montreal
     volumes:
-      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./.docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:latest
