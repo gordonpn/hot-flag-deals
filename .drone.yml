@@ -111,6 +111,8 @@ services:
     POSTGRES_USER: postgres
     POSTGRES_DB: test
     POSTGRES_PASSWORD: postgres
+- name: redis
+  image: redis
 
 volumes:
 - name: deps
@@ -218,6 +220,7 @@ steps:
     path: /var/run/docker.sock
   commands:
   - echo "Scan Docker images with Snyk"
+  - snyk test --severity-threshold=high https://github.com/gordonpn/hot-flag-deals
   # TODO snyk scan docker image
 
 volumes:
