@@ -63,6 +63,7 @@ func (a *App) handleDeals() http.HandlerFunc {
 func (a *App) handleHealthCheck() http.HandlerFunc {
 	log.Debug("Healthcheck API endpoint registered")
 	return func(w http.ResponseWriter, r *http.Request) {
+    log.Debug("Healthcheck pinged")
 		if err := a.DB.Ping(); err != nil {
 			respondWithJSON(w, http.StatusInternalServerError, map[string]string{"message": "not ok"})
 			log.Error(err.Error())
