@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -62,8 +63,13 @@ func (a *App) handleDeals() http.HandlerFunc {
 func (a *App) handleHealthCheck() http.HandlerFunc {
 	log.Debug("Healthcheck API endpoint registered")
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := a.DB.Ping()
-		if err != nil {
+		if err := a.DB.Ping(); err != nil {
+			respondWithJSON(w, http.StatusInternalServerError, map[string]string{"message": "not ok"})
+			log.Error(err.Error())
+			return
+		}
+		var ctx = context.Background()
+		if _, err := a.RDB.Ping(ctx).Result(); err != nil {
 			respondWithJSON(w, http.StatusInternalServerError, map[string]string{"message": "not ok"})
 			log.Error(err.Error())
 			return
