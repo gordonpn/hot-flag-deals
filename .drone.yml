@@ -263,6 +263,8 @@ steps:
       from_secret: SENDGRID_API_KEY
     SENDGRID_TEMPLATE:
       from_secret: SENDGRID_TEMPLATE
+    SENDGRID_TEMPLATE_CONFIRM:
+      from_secret: SENDGRID_TEMPLATE_CONFIRM
   volumes:
   - name: dockersock
     path: /var/run/docker.sock

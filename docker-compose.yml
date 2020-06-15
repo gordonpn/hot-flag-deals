@@ -54,6 +54,8 @@ services:
       - POSTGRES_NONROOT_USER
       - POSTGRES_NONROOT_PASSWORD
       - POSTGRES_NONROOT_DB
+      - SENDGRID_API_KEY
+      - SENDGRID_TEMPLATE_CONFIRM
     restart: unless-stopped
     depends_on:
       - postgres

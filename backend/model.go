@@ -89,8 +89,9 @@ func (s *subscriber) createSubscriber(db *sql.DB) error {
 		log.Error(fmt.Sprintf("Error with validating creating subscriber: %v", err))
 		return errors.New("an error has occurred")
 	}
-  // TODO send email to confirm
-  // https://deals.gordon-pn.com/confirm?email=gordon.pn6@gmail.com
+	if err := s.sendConfirmEmail(); err != nil {
+		log.Errorf("Error with sending confirmation email: %v", err)
+	}
 	sqlQuery := `INSERT INTO subscribers (name, email)
     VALUES ($1, $2)
     ON CONFLICT (email)
