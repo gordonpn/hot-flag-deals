@@ -1,9 +1,9 @@
-FROM golang:1.14-alpine AS builder
-ARG TARGETARCH=amd64
-ARG TARGETOS=linux
-RUN test -n "$TARGETARCH"
-RUN test -n "$TARGETOS"
-RUN echo "Building for $TARGETOS $TARGETARCH"
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:golang AS xgo
+FROM --platform=$BUILDPLATFORM golang:1.14-alpine AS builder
+COPY --from=xgo / /
+ARG TARGETPLATFORM
+RUN test -n "$TARGETPLATFORM"
+RUN echo "Building for $TARGETPLATFORM"
 RUN apk update
 RUN apk add --no-cache \
   ca-certificates \
@@ -27,9 +27,7 @@ RUN go mod verify
 COPY . .
 ENV \
   CGO_ENABLED=0 \
-  GO111MODULE=on \
-  GOARCH=$TARGETARCH \
-  GOOS=$TARGETOS
+  GO111MODULE=on
 RUN go build -a -installsuffix cgo -o main .
 FROM scratch
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
