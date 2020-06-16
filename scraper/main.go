@@ -39,7 +39,7 @@ func main() {
 	} else {
 		scheduler := clockwork.NewScheduler()
 		scheduler.SetPollingInterval(15 * 60000)
-		scheduler.Schedule().Every(30).Minutes().Do(job)
+		scheduler.Schedule().Every(20).Minutes().Do(job)
 		scheduler.Run()
 	}
 }

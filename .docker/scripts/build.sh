@@ -15,3 +15,5 @@ cd /drone/src/frontend || exit 1
 docker buildx build -t gordonpn/hotdeals-frontend:"$DOCKER_TAG" --platform linux/amd64,linux/arm64 --push .
 cd /drone/src/proxy || exit 1
 docker buildx build -t gordonpn/hotdeals-proxy:"$DOCKER_TAG" --platform linux/amd64,linux/arm64 --push .
+cd /drone/src/notifier || exit 1
+docker buildx build -t gordonpn/hotdeals-notifier:"$DOCKER_TAG" --platform linux/amd64,linux/arm64 --push .

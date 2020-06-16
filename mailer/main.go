@@ -23,7 +23,7 @@ func main() {
 	if !present {
 		scheduler := clockwork.NewScheduler()
 		scheduler.SetPollingInterval(30 * 60000)
-		scheduler.Schedule().Every().Day().At("10:00").Do(job)
+		scheduler.Schedule().Every().Day().At("8:30").Do(job)
 		scheduler.Run()
 	}
 }

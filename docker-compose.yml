@@ -45,6 +45,20 @@ services:
     depends_on:
       - postgres
 
+  notifier:
+    build:
+      context: ./notifier
+      dockerfile: Dockerfile
+    environment:
+      - NOTIFIER_HC_UUID
+      - POSTGRES_NONROOT_USER
+      - POSTGRES_NONROOT_PASSWORD
+      - POSTGRES_NONROOT_DB
+      - SLACK_NOTIFIER_HOOK
+      - TZ=America/Montreal
+    depends_on:
+      - postgres
+
   backend:
     build:
       context: ./backend

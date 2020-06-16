@@ -44,6 +44,8 @@ steps:
   - go build
   - cd /drone/src/backend
   - go build
+  - cd /drone/src/notifier
+  - go build
 - name: build arm64
   image: golang:1.14-alpine
   volumes:
@@ -58,6 +60,8 @@ steps:
   - cd /drone/src/mailer
   - go build
   - cd /drone/src/backend
+  - go build
+  - cd /drone/src/notifier
   - go build
 
 volumes:
@@ -210,6 +214,9 @@ steps:
     - cd /drone/src/backend
     - go get
     - golangci-lint run -E gosec ./...
+    - cd /drone/src/notifier
+    - go get
+    - golangci-lint run -E gosec ./...
 - name: snyk scan
   image: gordonpn/snyk-cli-drone
   environment:
@@ -259,12 +266,16 @@ steps:
       from_secret: POSTGRES_USER
     SCRAPER_HC_UUID:
       from_secret: SCRAPER_HC_UUID
+    NOTIFIER_HC_UUID:
+      from_secret: NOTIFIER_HC_UUID
     SENDGRID_API_KEY:
       from_secret: SENDGRID_API_KEY
     SENDGRID_TEMPLATE:
       from_secret: SENDGRID_TEMPLATE
     SENDGRID_TEMPLATE_CONFIRM:
       from_secret: SENDGRID_TEMPLATE_CONFIRM
+    SLACK_NOTIFIER_HOOK:
+      from_secret: SLACK_NOTIFIER_HOOK
   volumes:
   - name: dockersock
     path: /var/run/docker.sock

@@ -8,7 +8,7 @@ services:
       - "127.0.0.1:5432:5432"
 
   redis:
-    container_name: hotdeals-redis-dev
+    container_name: hotdeals_redis-dev
     ports:
       - "127.0.0.1:6379:6379"
 
@@ -22,22 +22,27 @@ services:
     environment:
       - DEV
 
+  notifier:
+    container_name: hotdeals_notifier-dev
+    environment:
+      - DEV
+
   backend:
-    container_name: hotdeals-backend-dev
+    container_name: hotdeals_backend-dev
     environment:
       - NODE_ENV=development
     ports:
       - "127.0.0.1:8080:8080"
 
   frontend:
-    container_name: hotdeals-frontend-dev
+    container_name: hotdeals_frontend-dev
     environment:
       - NODE_ENV=development
     ports:
       - "127.0.0.1:3000:3000"
 
   proxy:
-    container_name: hotdeals-proxy-dev
+    container_name: hotdeals_proxy-dev
     ports:
       - "127.0.0.1:4000:80"
 

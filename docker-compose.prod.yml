@@ -28,7 +28,7 @@ services:
           - node.labels.main-node == true
 
   redis:
-    container_name: hotdeals-redis
+    container_name: hotdeals_redis
     expose:
       - 6379
     networks:
@@ -94,6 +94,27 @@ services:
         max_attempts: 3
         window: 120s
 
+  notifier:
+    container_name: hotdeals_notifier
+    restart: unless-stopped
+    image: gordonpn/hotdeals-notifier:stable
+    networks:
+      - hotdeals-network
+    deploy:
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
   backend:
     container_name: hotdeals_backend
     image: gordonpn/hotdeals-backend:stable
@@ -126,7 +147,7 @@ services:
         window: 120s
 
   frontend:
-    container_name: hotdeals-frontend
+    container_name: hotdeals_frontend
     image: gordonpn/hotdeals-frontend:stable
     environment:
       - NODE_ENV=production
@@ -159,7 +180,7 @@ services:
         window: 120s
 
   proxy:
-    container_name: hotdeals-proxy
+    container_name: hotdeals_proxy
     image: gordonpn/hotdeals-proxy:stable
     networks:
       - traefik-public
