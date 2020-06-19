@@ -124,7 +124,7 @@ volumes:
 ---
 kind: pipeline
 type: docker
-name: build and publish docker image latest
+name: build and publish latest
 
 platform:
   os: linux
@@ -158,7 +158,7 @@ volumes:
 ---
 kind: pipeline
 type: docker
-name: build and publish docker image stable
+name: build and publish stable
 
 platform:
   os: linux
@@ -199,7 +199,7 @@ trigger:
   branch: [ develop ]
 
 depends_on:
-- build and publish docker image latest
+- build and publish latest
 
 steps:
 - name: golangci-lint
@@ -217,6 +217,22 @@ steps:
     - cd /drone/src/notifier
     - go get
     - golangci-lint run -E gosec ./...
+- name: trivy scan
+  image: docker
+  environment:
+    GITHUB_TOKEN:
+      from_secret: GITHUB_TOKEN
+  commands:
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL repo https://github.com/gordonpn/hot-flag-deals
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-mailer
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-notifier
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-frontend
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-backend
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-scraper
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-proxy
+  volumes:
+    - name: dockersock
+      path: /var/run/docker.sock
 - name: snyk scan
   image: gordonpn/snyk-cli-drone
   environment:
@@ -243,7 +259,7 @@ trigger:
   branch: [ master ]
 
 depends_on:
-  - build and publish docker image stable
+  - build and publish stable
 
 steps:
 - name: deploy prod
@@ -314,7 +330,7 @@ steps:
 depends_on:
 - build
 - test
-- build and publish docker image stable
-- build and publish docker image latest
+- build and publish stable
+- build and publish latest
 - security
 - deploy
