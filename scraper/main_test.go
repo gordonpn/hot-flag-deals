@@ -24,7 +24,7 @@ func TestParseDateTime(t *testing.T) {
 
 func testParseDateTimeFunc(testString string, expected time.Time) func(*testing.T) {
 	return func(t *testing.T) {
-		result := ParseDateTime(testString)
+		result := parseDateTime(testString)
 		if !result.Equal(expected) {
 			t.Errorf("Expected %s, but got %s", expected, result)
 		}
@@ -60,7 +60,7 @@ func TestStrToInt(t *testing.T) {
 
 func testStrToIntFunc(testString string, expected int) func(*testing.T) {
 	return func(t *testing.T) {
-		result := StrToInt(testString)
+		result := strToInt(testString)
 		if result != expected {
 			t.Errorf("Expected %d, but got %d", expected, result)
 		}

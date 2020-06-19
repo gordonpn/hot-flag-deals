@@ -21,7 +21,7 @@ func TestRound(t *testing.T) {
 
 func testRoundFunc(testFloat float64, expected int) func(*testing.T) {
 	return func(t *testing.T) {
-		result := Round(testFloat)
+		result := round(testFloat)
 		if result != expected {
 			t.Errorf("Expected %d, but got %d", expected, result)
 		}
@@ -35,7 +35,7 @@ func TestGetMean(t *testing.T) {
 
 func testGetMeanFunc(testSlice []int, expected float64) func(*testing.T) {
 	return func(t *testing.T) {
-		result := GetMean(testSlice)
+		result := getMean(testSlice)
 		if result != expected {
 			t.Errorf("Expected %f, but got %f", expected, result)
 		}
@@ -49,7 +49,7 @@ func TestGetMedian(t *testing.T) {
 
 func testGetMedianFunc(testSlice []int, expected int) func(*testing.T) {
 	return func(t *testing.T) {
-		result := GetMedian(testSlice)
+		result := getMedian(testSlice)
 		if result != expected {
 			t.Errorf("Expected %d, but got %d", expected, result)
 		}
@@ -63,7 +63,7 @@ func TestGetStandDev(t *testing.T) {
 
 func testGetStandDevFunc(testSlice []int, testMean float64, expected float64) func(*testing.T) {
 	return func(t *testing.T) {
-		result := GetStandDev(testSlice, testMean)
+		result := getStandDev(testSlice, testMean)
 		if !withTolerance(result, expected) {
 			t.Errorf("Expected %f, but got %f", expected, result)
 		}
@@ -84,7 +84,7 @@ func TestGetSkewness(t *testing.T) {
 
 func testGetSkewnessFunc(testMean float64, testMedian int, testStandDev float64, expected float64) func(*testing.T) {
 	return func(t *testing.T) {
-		result := GetSkewness(testMean, testMedian, testStandDev)
+		result := getSkewness(testMean, testMedian, testStandDev)
 		if !withTolerance(result, expected) {
 			t.Errorf("Expected %f, but got %f", expected, result)
 		}

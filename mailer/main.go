@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	HCURL = "https://hc-ping.com"
+	healthCheckURL = "https://hc-ping.com"
 )
 
 func main() {
@@ -49,7 +49,7 @@ func job() {
 }
 
 func signalHealthCheck(action string) {
-	resp, err := http.Get(fmt.Sprintf("%s/%s%s", HCURL, os.Getenv("MAILER_HC_UUID"), action))
+	resp, err := http.Get(fmt.Sprintf("%s/%s%s", healthCheckURL, os.Getenv("MAILER_HC_UUID"), action))
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
 	}

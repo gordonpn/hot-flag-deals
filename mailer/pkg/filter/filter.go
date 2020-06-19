@@ -28,30 +28,30 @@ func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) 
 		viewsSlice = append(viewsSlice, thread.Views)
 		votesSlice = append(votesSlice, thread.Votes)
 	}
-	viewsMean = GetMean(viewsSlice)
-	votesMean = GetMean(votesSlice)
+	viewsMean = getMean(viewsSlice)
+	votesMean = getMean(votesSlice)
 
-	viewsMedian = GetMedian(viewsSlice)
-	votesMedian = GetMedian(votesSlice)
+	viewsMedian = getMedian(viewsSlice)
+	votesMedian = getMedian(votesSlice)
 
-	viewsStandDev = GetStandDev(viewsSlice, viewsMean)
-	votesStandDev = GetStandDev(votesSlice, votesMean)
+	viewsStandDev = getStandDev(viewsSlice, viewsMean)
+	votesStandDev = getStandDev(votesSlice, votesMean)
 
-	viewsSkewness = GetSkewness(viewsMean, viewsMedian, viewsStandDev)
-	votesSkewness = GetSkewness(votesMean, votesMedian, votesStandDev)
+	viewsSkewness = getSkewness(viewsMean, viewsMedian, viewsStandDev)
+	votesSkewness = getSkewness(votesMean, votesMedian, votesStandDev)
 
 	if math.Abs(viewsSkewness) >= standDevThreshold {
 		viewsThreshold = viewsMedian
 	} else {
-		viewsThreshold = Round(viewsMean)
+		viewsThreshold = round(viewsMean)
 	}
 	if math.Abs(votesSkewness) >= standDevThreshold {
 		votesThreshold = votesMedian
 	} else {
-		votesThreshold = Round(votesMean)
+		votesThreshold = round(votesMean)
 	}
-	viewsThreshold = Round(float64(viewsThreshold) * viewsThresholdCoeff)
-	votesThreshold = Round(float64(votesThreshold) * votesThresholdCoeff)
+	viewsThreshold = round(float64(viewsThreshold) * viewsThresholdCoeff)
+	votesThreshold = round(float64(votesThreshold) * votesThresholdCoeff)
 	log.WithFields(log.Fields{
 		"viewsMean":           viewsMean,
 		"viewsMedian":         viewsMedian,
@@ -69,7 +69,7 @@ func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) 
 	return
 }
 
-func GetMean(intSlice []int) (mean float64) {
+func getMean(intSlice []int) (mean float64) {
 	sum := 0
 	for _, num := range intSlice {
 		sum += num
@@ -78,7 +78,7 @@ func GetMean(intSlice []int) (mean float64) {
 	return
 }
 
-func GetMedian(intSlice []int) (median int) {
+func getMedian(intSlice []int) (median int) {
 	sort.Ints(intSlice)
 	middle := len(intSlice) / 2
 	if len(intSlice)%2 == 0 {
@@ -89,7 +89,7 @@ func GetMedian(intSlice []int) (median int) {
 	return
 }
 
-func GetStandDev(intSlice []int, mean float64) (standDev float64) {
+func getStandDev(intSlice []int, mean float64) (standDev float64) {
 	for i := range intSlice {
 		standDev += math.Pow(float64(intSlice[i])-mean, 2)
 	}
@@ -97,7 +97,7 @@ func GetStandDev(intSlice []int, mean float64) (standDev float64) {
 	return
 }
 
-func GetSkewness(mean float64, median int, standDev float64) (skewness float64) {
+func getSkewness(mean float64, median int, standDev float64) (skewness float64) {
 	skewness = (mean - float64(median)) * 3 / standDev
 	return
 }
@@ -107,12 +107,13 @@ func Filter(threads []types.Thread) (filteredThreads []types.Thread) {
 	const TimeThreshold = 72
 
 	for _, thread := range threads {
-		if (thread.Views >= viewsThreshold && thread.Votes >= votesThreshold) && !thread.Seen {
-			timeNow := time.Now()
-			diffHours := timeNow.Sub(thread.DatePosted).Hours()
-			if diffHours <= TimeThreshold {
-				filteredThreads = append(filteredThreads, thread)
-			}
+		timeNow := time.Now()
+		diffHours := timeNow.Sub(thread.DatePosted).Hours()
+		if thread.Seen || diffHours > TimeThreshold {
+			continue
+		}
+		if (thread.Views >= viewsThreshold && thread.Votes > 0) || thread.Votes >= votesThreshold {
+			filteredThreads = append(filteredThreads, thread)
 		}
 	}
 	sort.SliceStable(filteredThreads, func(this, that int) bool {
@@ -125,7 +126,7 @@ func Filter(threads []types.Thread) (filteredThreads []types.Thread) {
 	return
 }
 
-func Round(val float64) int {
+func round(val float64) int {
 	if val < 0 {
 		return int(val - 0.5)
 	}

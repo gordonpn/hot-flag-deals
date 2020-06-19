@@ -27,6 +27,15 @@ export default function Copyright() {
       >
         Source Code on GitHub
       </MuiLink>
+      <br />
+      <MuiLink
+        color="inherit"
+        href="https://www.buymeacoffee.com/gordonpn"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        If you enjoy what I&apos;m making, you can buy me a coffee!
+      </MuiLink>
     </Typography>
   );
 }

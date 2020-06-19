@@ -24,12 +24,12 @@ type thread struct {
 	Votes      int
 	Views      int
 	DatePosted time.Time
-  Seen       bool
-  Notified   bool
+	Seen       bool
+	Notified   bool
 }
 
 const (
-	HCURL = "https://hc-ping.com"
+	healthCheckURL = "https://hc-ping.com"
 )
 
 func main() {
@@ -62,7 +62,7 @@ func job() {
 }
 
 func signalHealthCheck(action string) {
-	start, err := http.Get(fmt.Sprintf("%s/%s%s", HCURL, os.Getenv("SCRAPER_HC_UUID"), action))
+	start, err := http.Get(fmt.Sprintf("%s/%s%s", healthCheckURL, os.Getenv("SCRAPER_HC_UUID"), action))
 	if err != nil {
 		log.WithFields(log.Fields{"Error": err}).Warn("Problem with GET request")
 	}
@@ -86,19 +86,19 @@ func getPosts() (threads []thread) {
 		collector.OnHTML(selector, func(element *colly.HTMLElement) {
 			tempThread := thread{}
 
-			id := StrToInt(element.Attr("data-thread-id"))
+			id := strToInt(element.Attr("data-thread-id"))
 			if id == 0 {
 				return
 			}
 			retailer := element.ChildText("div > div.thread_info > div.thread_info_main.postvoting_enabled > div > h3 > a.topictitle_retailer")
-			posts := StrToInt(element.ChildText("div > div.posts"))
-			votes := StrToInt(element.ChildText("div > div.thread_info > div.thread_info_main.postvoting_enabled > div > div > dl > dd"))
-			views := StrToInt(element.ChildText("div > div.views"))
+			posts := strToInt(element.ChildText("div > div.posts"))
+			votes := strToInt(element.ChildText("div > div.thread_info > div.thread_info_main.postvoting_enabled > div > div > dl > dd"))
+			views := strToInt(element.ChildText("div > div.views"))
 			title := strings.TrimSpace(element.ChildText(titleSelector))
 			title = strings.ReplaceAll(title, "\n", "")
 			datePosted := strings.TrimSpace(element.ChildText(dateSelector))
 
-			datetime := ParseDateTime(datePosted)
+			datetime := parseDateTime(datePosted)
 
 			tempThread.ID = id
 			if len(retailer) > 0 {
@@ -172,7 +172,7 @@ func upsertIntoDB(threads []thread) {
 	).Debug("Length and capacity of threads")
 
 	for _, thread := range threads {
-    sqlStatement := `INSERT INTO threads (id, title, link, posts, votes, views, date_posted)
+		sqlStatement := `INSERT INTO threads (id, title, link, posts, votes, views, date_posted)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     ON CONFLICT (id)
     DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
@@ -184,7 +184,7 @@ func upsertIntoDB(threads []thread) {
 	}
 }
 
-func ParseDateTime(datetime string) (parsedDateTime time.Time) {
+func parseDateTime(datetime string) (parsedDateTime time.Time) {
 	loc, _ := time.LoadLocation("America/Montreal")
 	layout := "Jan 2 2006 3:04 pm"
 
@@ -215,7 +215,7 @@ func ParseDateTime(datetime string) (parsedDateTime time.Time) {
 	return
 }
 
-func StrToInt(str string) (i int) {
+func strToInt(str string) (i int) {
 	str = strings.TrimSpace(str)
 	if len(str) < 1 {
 		return 0

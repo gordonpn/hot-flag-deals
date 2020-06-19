@@ -8,6 +8,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          <meta name="description" content="Red Flag Deals Hot Deals Forums scraper, displays the top scoring deals from the last 48 hours with option for daily newsletter email" />
           <meta name="theme-color" content={theme.palette.primary.main} />
           <link
             rel="stylesheet"
