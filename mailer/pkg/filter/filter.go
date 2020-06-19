@@ -8,22 +8,23 @@ import (
 	"time"
 )
 
+var (
+	standDevThreshold   = 0.9
+	viewsMean           float64
+	viewsMedian         int
+	viewsSkewness       float64
+	viewsSlice          []int
+	viewsStandDev       float64
+	viewsThresholdCoeff = 1.05
+	votesMean           float64
+	votesMedian         int
+	votesSkewness       float64
+	votesSlice          []int
+	votesStandDev       float64
+	votesThresholdCoeff = 3.0
+)
+
 func getThresholds(threads []types.Thread) (viewsThreshold, votesThreshold int) {
-	var (
-		standDevThreshold   = 0.9
-		viewsMean           float64
-		viewsMedian         int
-		viewsSkewness       float64
-		viewsSlice          []int
-		viewsStandDev       float64
-		viewsThresholdCoeff = 1.05
-		votesMean           float64
-		votesMedian         int
-		votesSkewness       float64
-		votesSlice          []int
-		votesStandDev       float64
-		votesThresholdCoeff = 3.0
-	)
 	for _, thread := range threads {
 		viewsSlice = append(viewsSlice, thread.Views)
 		votesSlice = append(votesSlice, thread.Votes)
@@ -112,7 +113,7 @@ func Filter(threads []types.Thread) (filteredThreads []types.Thread) {
 		if thread.Seen || diffHours > TimeThreshold {
 			continue
 		}
-		if (thread.Views >= viewsThreshold && thread.Votes > 0) || thread.Votes >= votesThreshold {
+		if (thread.Views >= viewsThreshold && thread.Votes > int(votesMean)) || thread.Votes >= votesThreshold {
 			filteredThreads = append(filteredThreads, thread)
 		}
 	}

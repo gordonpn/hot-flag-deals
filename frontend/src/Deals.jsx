@@ -26,6 +26,7 @@ export default function Deals() {
             data.push(item);
           });
           data.sort((a, b) => (a.votes < b.votes ? 1 : -1));
+          data.length = 50;
           setState(data);
           setLoading(false);
         })
@@ -60,7 +61,7 @@ export default function Deals() {
   return (
     <>
       <Typography variant="h4" component="h4" gutterBottom>
-        Deals from the last 48 hours
+        Top 50 deals from the last 48 hours
       </Typography>
       <Paper elevation={24}>
         <List dense>
