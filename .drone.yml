@@ -204,6 +204,7 @@ depends_on:
 steps:
 - name: golangci-lint
   image: golangci/golangci-lint
+  failure: ignore
   commands:
     - cd /drone/src/scraper
     - go get
@@ -219,6 +220,7 @@ steps:
     - golangci-lint run -E gosec ./...
 - name: trivy scan
   image: docker
+  failure: ignore
   environment:
     GITHUB_TOKEN:
       from_secret: GITHUB_TOKEN
@@ -235,6 +237,7 @@ steps:
       path: /var/run/docker.sock
 - name: snyk scan
   image: gordonpn/snyk-cli-drone
+  failure: ignore
   environment:
     SNYK_TOKEN:
       from_secret: SNYK_TOKEN

@@ -48,9 +48,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      placement:
-        constraints:
-          - node.labels.main-node == true
 
   scraper:
     container_name: hotdeals_scraper
