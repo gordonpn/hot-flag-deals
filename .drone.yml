@@ -226,12 +226,12 @@ steps:
       from_secret: GITHUB_TOKEN
   commands:
     - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL repo https://github.com/gordonpn/hot-flag-deals
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-backend
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-frontend
     - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-mailer
     - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-notifier
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-frontend
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-backend
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-scraper
     - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-proxy
+    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-scraper
   volumes:
     - name: dockersock
       path: /var/run/docker.sock
@@ -246,7 +246,12 @@ steps:
     path: /var/run/docker.sock
   commands:
   - echo "Scan Docker images with Snyk"
-  # TODO snyk scan docker image
+  - snyk test --docker gordonpn/hotdeals-backend:latest --file=Dockerfile --exclude-base-image-vulns
+  - snyk test --docker gordonpn/hotdeals-frontend:latest --file=Dockerfile --exclude-base-image-vulns
+  - snyk test --docker gordonpn/hotdeals-mailer:latest --file=Dockerfile --exclude-base-image-vulns
+  - snyk test --docker gordonpn/hotdeals-notifier:latest --file=Dockerfile --exclude-base-image-vulns
+  - snyk test --docker gordonpn/hotdeals-proxy:latest --file=Dockerfile --exclude-base-image-vulns
+  - snyk test --docker gordonpn/hotdeals-scraper:latest --file=Dockerfile --exclude-base-image-vulns
 
 volumes:
 - name: dockersock
