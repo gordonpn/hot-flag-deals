@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -97,15 +99,27 @@ func getPosts() (threads []thread) {
 			title := strings.TrimSpace(element.ChildText(titleSelector))
 			title = strings.ReplaceAll(title, "\n", "")
 			datePosted := strings.TrimSpace(element.ChildText(dateSelector))
-
 			datetime := parseDateTime(datePosted)
 
-			tempThread.ID = id
 			if len(retailer) > 0 {
+				title := strings.ReplaceAll(title, retailer, "")
 				tempThread.Title = fmt.Sprintf("[%s] %s", retailer, title)
 			} else {
+				indexLeft := strings.Index(title, "[")
+				indexRight := strings.Index(title, "]")
+				if indexLeft > -1 && indexRight > -1 {
+					retailer := title[indexLeft+1 : indexRight]
+					titleWithoutRetailer := title[indexRight+1:]
+					cleanTitleWithoutRetailer := strings.ReplaceAll(titleWithoutRetailer, retailer, "")
+					title = fmt.Sprintf("[%s]%s", retailer, cleanTitleWithoutRetailer)
+				}
 				tempThread.Title = title
 			}
+			re := regexp.MustCompile("[ ]{2,}")
+			tempThread.Title = re.ReplaceAllString(tempThread.Title, " ")
+			log.Debug(tempThread.Title)
+
+			tempThread.ID = id
 			tempThread.Link = fmt.Sprintf("%s%s", linkPrefix, strings.TrimSpace(element.ChildAttr(linkSelector, "href")))
 			tempThread.Posts = posts
 			tempThread.Votes = votes
@@ -125,11 +139,13 @@ func getPosts() (threads []thread) {
 	for i := 1; i <= 10; i++ {
 		url := fmt.Sprintf("https://forums.redflagdeals.com/hot-deals-f9/%d", i)
 		err := collector.Visit(url)
+		rand.Seed(time.Now().UnixNano())
+		n := rand.Intn(10)
+		time.Sleep(time.Duration(n) * time.Second)
 		if err != nil {
 			log.Warn(err)
 		}
 	}
-
 	return
 }
 
@@ -172,10 +188,10 @@ func upsertIntoDB(threads []thread) {
 	).Debug("Length and capacity of threads")
 
 	for _, thread := range threads {
-		sqlStatement := `INSERT INTO threads (id, title, link, posts, votes, views, date_posted)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT (id)
-    DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
+		sqlStatement := `
+		INSERT INTO threads (id, title, link, posts, votes, views, date_posted)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, posts = EXCLUDED.posts, votes = EXCLUDED.votes, views = EXCLUDED.views`
 
 		_, err = db.Exec(sqlStatement, thread.ID, thread.Title, thread.Link, thread.Posts, thread.Votes, thread.Views, thread.DatePosted)
 		if err != nil {
