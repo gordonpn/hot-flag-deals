@@ -2,3 +2,7 @@
 root * /usr/share/caddy
 file_server
 try_files {path}.html {path}
+log {
+  output stdout
+  format console
+}

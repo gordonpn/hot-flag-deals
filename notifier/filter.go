@@ -34,7 +34,7 @@ func (a *App) filter() []thread {
 		if thread.Notified || diffHours >= TimeThreshold {
 			continue
 		}
-		if thread.Posts >= a.postsMedian && thread.Views >= a.viewsMedian && thread.Votes >= a.votesMedian {
+		if thread.Posts >= int(float64(a.postsMedian)*0.8) && thread.Views >= a.viewsMedian && thread.Votes >= a.votesMedian {
 			threads = append(threads, thread)
 		}
 	}
