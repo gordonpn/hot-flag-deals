@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/gordonpn/hot-flag-deals/pkg/database"
-	"github.com/gordonpn/hot-flag-deals/pkg/filter"
 	"net/http"
 	"os"
 
-	"github.com/gordonpn/hot-flag-deals/internal/sendgridmailer"
+	"github.com/gordonpn/hot-flag-deals/mailer/pkg/database"
+	"github.com/gordonpn/hot-flag-deals/mailer/pkg/filter"
+
+	"github.com/gordonpn/hot-flag-deals/mailer/internal/sendgridmailer"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"

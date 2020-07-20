@@ -5,6 +5,7 @@
 Software as a service scraping the [Hot Deals forums](https://forums.redflagdeals.com/hot-deals-f9/) and delivering newsletter emails on trending deals from the Forum.
 
 ---
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Build Status](https://drone.gordon-pn.com/api/badges/gordonpn/hot-flag-deals/status.svg)](https://drone.gordon-pn.com/gordonpn/hot-flag-deals)
 [![Uptime Robot](https://badgen.net/uptime-robot/status/m785314563-47a09fd2b0e8619f429b7a4f)](https://deals.gordon-pn.com)
 ![Healthchecks.io](https://healthchecks.io/badge/85143171-fec6-42e7-b3d8-bc7f499f5d0d/r5YwfK0Y.svg)

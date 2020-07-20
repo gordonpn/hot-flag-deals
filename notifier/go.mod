@@ -1,4 +1,4 @@
-module github.com/gordonpn/hot-flag-deals
+module github.com/gordonpn/hot-flag-deals/notifier
 
 go 1.14
 

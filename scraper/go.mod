@@ -1,4 +1,4 @@
-module github.com/gordonpn/hot-flag-deals
+module github.com/gordonpn/hot-flag-deals/scraper
 
 go 1.14
 

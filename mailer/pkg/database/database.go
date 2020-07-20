@@ -3,10 +3,11 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	types "github.com/gordonpn/hot-flag-deals/pkg/data"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
+
+	types "github.com/gordonpn/hot-flag-deals/mailer/pkg/data"
+	log "github.com/sirupsen/logrus"
 )
 
 type pgdb struct {

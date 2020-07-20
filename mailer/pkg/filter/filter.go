@@ -1,11 +1,12 @@
 package filter
 
 import (
-	types "github.com/gordonpn/hot-flag-deals/pkg/data"
-	log "github.com/sirupsen/logrus"
 	"math"
 	"sort"
 	"time"
+
+	types "github.com/gordonpn/hot-flag-deals/mailer/pkg/data"
+	log "github.com/sirupsen/logrus"
 )
 
 var (

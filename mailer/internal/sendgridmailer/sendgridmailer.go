@@ -2,13 +2,13 @@ package sendgridmailer
 
 import (
 	"fmt"
-	"github.com/gordonpn/hot-flag-deals/pkg/data"
-	"github.com/gordonpn/hot-flag-deals/pkg/database"
+	"os"
+	"time"
+
+	"github.com/gordonpn/hot-flag-deals/mailer/pkg/database"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"time"
 )
 
 func SendNewsletter(threads []types.Thread) {
