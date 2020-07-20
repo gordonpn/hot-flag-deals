@@ -29,7 +29,7 @@ func (a *App) notify(threads []thread) error {
 		if err != nil {
 			return err
 		}
-		_, err = http.Post(slackWebhook, "application/json", bytes.NewBuffer(reqBody)) //nolint:gosec
+		_, err = http.Post(slackWebhook, "application/json", bytes.NewBuffer(reqBody))
 		if err != nil {
 			return err
 		}
