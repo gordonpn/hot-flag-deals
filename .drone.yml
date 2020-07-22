@@ -245,7 +245,7 @@ steps:
   - name: dockersock
     path: /var/run/docker.sock
   commands:
-  - echo "Scan Docker images with Snyk"
+  - snyk test --severity-threshold=high https://github.com/gordonpn/hot-flag-deals
   - snyk test --docker gordonpn/hotdeals-backend:latest --file=Dockerfile --exclude-base-image-vulns
   - snyk test --docker gordonpn/hotdeals-frontend:latest --file=Dockerfile --exclude-base-image-vulns
   - snyk test --docker gordonpn/hotdeals-mailer:latest --file=Dockerfile --exclude-base-image-vulns
@@ -310,35 +310,3 @@ volumes:
 - name: dockersock
   host:
     path: /var/run/docker.sock
-
----
-kind: pipeline
-type: docker
-name: notification after
-
-trigger:
-  event: [ push, pull_request ]
-
-steps:
-- name: slack after
-  image: plugins/slack
-  failure: ignore
-  settings:
-    channel: drone-ci
-    template: >
-      {{repo.name}}:
-      {{#success build.status}}
-      build #{{build.number}} succeeded
-      {{else}}
-      build #{{build.number}} failed
-      {{/success}}
-    webhook:
-      from_secret: SLACK_WEBHOOK_URL
-
-depends_on:
-- build
-- test
-- build and publish stable
-- build and publish latest
-- security
-- deploy
