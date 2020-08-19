@@ -2,6 +2,7 @@ package sendgridmailer
 
 import (
 	"fmt"
+	types "github.com/gordonpn/hot-flag-deals/mailer/pkg/data"
 	"os"
 	"time"
 
