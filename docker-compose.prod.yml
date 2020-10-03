@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     container_name: hotdeals_postgres
@@ -115,8 +115,6 @@ services:
   backend:
     container_name: hotdeals_backend
     image: gordonpn/hotdeals-backend:stable
-    environment:
-      - NODE_ENV=production
     networks:
       - hotdeals-network
     expose:

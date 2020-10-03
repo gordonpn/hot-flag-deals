@@ -5,6 +5,7 @@
 Software as a service scraping the [Hot Deals forums](https://forums.redflagdeals.com/hot-deals-f9/) and delivering newsletter emails on trending deals from the Forum.
 
 ---
+
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Build Status](https://drone.gordon-pn.com/api/badges/gordonpn/hot-flag-deals/status.svg)](https://drone.gordon-pn.com/gordonpn/hot-flag-deals)
 [![Uptime Robot](https://badgen.net/uptime-robot/status/m785314563-47a09fd2b0e8619f429b7a4f)](https://deals.gordon-pn.com)
@@ -37,65 +38,65 @@ Base email template design by [@tiffzeng](https://github.com/tiffzeng)
 
 The project is split into several directories (services):
 
-* Scraper
+- Scraper
 
   Scrapes the forums periodically and depends on the database to persist the data.
 
-* Mailer
+- Mailer
 
   Sends the daily newsletter email.
 
-* Backend
+- Backend
 
   REST API, takes care of sending data to the frontend and managing subscribing and unsubscribing.
 
-* Frontend
+- Frontend
 
   Displays the deals nicely, and provides the subscription form.
 
-* Proxy
+- Proxy
 
   Forwards requests to the right service.
 
-* HTML templates
+- HTML templates
 
   Email templates built with mjml for the design of the newsletter emails and confirmation emails.
 
 ## Built with / technologies used
 
-* Go programming language
-* SendGrid
-* Docker & Docker Swarm
-* PostgreSQL
-* Redis
-* Drone CI
-* Nginx
-* Next.js
-* React.js
-* Material-UI
+- Go programming language
+- SendGrid
+- Docker & Docker Swarm
+- PostgreSQL
+- Redis
+- Drone CI
+- Nginx
+- Next.js
+- React.js
+- Material-UI
 
 ## Features
 
-* Automated scraping of the Forum
-* Insert and update a database
-* Automated newsletter email
-* Algorithm to filter the junk
-* Website to browse the deals and subscribe to the emails
-* Confirmation email when a user subscribes
+- Automated scraping of the Forum
+- Insert and update a database
+- Automated newsletter email
+- Algorithm to filter the junk
+- Website to browse the deals and subscribe to the emails
+- Confirmation email when a user subscribes
 
 ## Getting started
 
 ### Prerequisites
 
-* Go(lang) v1.14+
-* Docker-compose v1.25.5+
-* Docker v19.03+
-* Node.js v14+
+- Go(lang) v1.14+
+- Docker-compose v1.25.5+
+- Docker v19.03+
+- Node.js v14+
 
 ### Configuration
 
 | Variable                  | Description                                                                                                |
-|---------------------------|------------------------------------------------------------------------------------------------------------|
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | SENDGRID_API_KEY          | SendGrid API key to use the service                                                                        |
 | SENDGRID_TEMPLATE         | SendGrid requires you to upload an html template to use for dynamic emails, this is the ID of the template |
 | SENDGRID_TEMPLATE_CONFIRM | SendGrid template ID for confirmation emails                                                               |
@@ -133,7 +134,7 @@ You may open an issue for discussion.
 
 ## Authors
 
-* Myself [@gordonpn](https://github.com/gordonpn)
+- Myself [@gordonpn](https://github.com/gordonpn)
 
 ## License
 
