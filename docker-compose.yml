@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   postgres:
-    image: postgres
+    image: postgres:12
     environment:
       - POSTGRES_DB
       - POSTGRES_NONROOT_DB
