@@ -29,6 +29,7 @@ ENV \
   CGO_ENABLED=0 \
   GO111MODULE=on
 RUN go build -a -installsuffix cgo -o main .
+
 FROM golang:1.14-alpine
 RUN apk add --no-cache \
   curl \

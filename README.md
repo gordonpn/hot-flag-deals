@@ -32,8 +32,6 @@ With this project, I saved myself the chore of checking the (messy) forum a few 
 
 <a href="./docs/newsletter.png"><img src="./docs/newsletter.png" height="900"></a>
 
-Base email template design by [@tiffzeng](https://github.com/tiffzeng)
-
 ## How It Works
 
 The project is split into several directories (services):
@@ -134,7 +132,7 @@ You may open an issue for discussion.
 
 ## Authors
 
-- Myself [@gordonpn](https://github.com/gordonpn)
+[@gordonpn](https://github.com/gordonpn)
 
 ## License
 
