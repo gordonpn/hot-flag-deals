@@ -4,69 +4,71 @@ type: docker
 name: notification
 
 trigger:
-  event: [ push, pull_request ]
+  event: [push, pull_request]
 
 steps:
-- name: slack before
-  image: plugins/slack
-  failure: ignore
-  settings:
-    channel: drone-ci
-    template: >
-      {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
-      build #{{build.number}} started
-      {{build.link}}
-    webhook:
-      from_secret: SLACK_WEBHOOK_URL
+  - name: slack before
+    image: plugins/slack
+    failure: ignore
+    settings:
+      channel: drone-ci
+      template: >
+        {{ uppercasefirst build.event }} on branch {{ build.branch }} from repo {{repo.name}}
+
+        Build #{{build.number}} started
+
+        <{{ build.link }}|Visit build page ➡️>
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
 ---
 kind: pipeline
 type: docker
 name: build
 
 trigger:
-  event: [ push, pull_request ]
+  event: [push, pull_request]
   branch:
-    exclude: [ master ]
+    exclude: [master]
 
 steps:
-- name: build amd64
-  image: golang:1.14-alpine
-  volumes:
-  - name: deps
-    path: /go
-  environment:
-    GOOS: linux
-    GOARCH: amd64
-  commands:
-  - cd /drone/src/scraper
-  - go build
-  - cd /drone/src/mailer
-  - go build
-  - cd /drone/src/backend
-  - go build
-  - cd /drone/src/notifier
-  - go build
-- name: build arm64
-  image: golang:1.14-alpine
-  volumes:
-  - name: deps
-    path: /go
-  environment:
-    GOOS: linux
-    GOARCH: arm64
-  commands:
-  - cd /drone/src/scraper
-  - go build
-  - cd /drone/src/mailer
-  - go build
-  - cd /drone/src/backend
-  - go build
-  - cd /drone/src/notifier
-  - go build
+  - name: build amd64
+    image: golang:1.14-alpine
+    volumes:
+      - name: deps
+        path: /go
+    environment:
+      GOOS: linux
+      GOARCH: amd64
+    commands:
+      - cd /drone/src/scraper
+      - go build
+      - cd /drone/src/mailer
+      - go build
+      - cd /drone/src/backend
+      - go build
+      - cd /drone/src/notifier
+      - go build
+  - name: build arm64
+    image: golang:1.14-alpine
+    volumes:
+      - name: deps
+        path: /go
+    environment:
+      GOOS: linux
+      GOARCH: arm64
+    commands:
+      - cd /drone/src/scraper
+      - go build
+      - cd /drone/src/mailer
+      - go build
+      - cd /drone/src/backend
+      - go build
+      - cd /drone/src/notifier
+      - go build
 
 volumes:
-- name: deps
-  temp: {}
+  - name: deps
+    temp: {}
 
 ---
 kind: pipeline
@@ -74,239 +76,167 @@ type: docker
 name: test
 
 trigger:
-  event: [ push, pull_request ]
+  event: [push, pull_request]
   branch:
-    exclude: [ master ]
+    exclude: [master]
 
 steps:
-- name: test scraper
-  image: golang:1.14-buster
-  volumes:
-  - name: deps
-    path: /go
-  commands:
-  - cd /drone/src/scraper
-  - go test -v
-- name: test mailer
-  image: golang:1.14-buster
-  volumes:
-  - name: deps
-    path: /go
-  commands:
-  - cd /drone/src/mailer
-  - go test -v
-- name: test backend
-  image: golang:1.14-buster
-  volumes:
-  - name: deps
-    path: /go
-  environment:
-    POSTGRES_NONROOT_USER: postgres
-    POSTGRES_NONROOT_DB: test
-    POSTGRES_NONROOT_PASSWORD: postgres
-  commands:
-  - cd /drone/src/backend
-  - go test -v
+  - name: test scraper
+    image: golang:1.14-buster
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - cd /drone/src/scraper
+      - go test -v
+  - name: test mailer
+    image: golang:1.14-buster
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - cd /drone/src/mailer
+      - go test -v
+  - name: test backend
+    image: golang:1.14-buster
+    volumes:
+      - name: deps
+        path: /go
+    environment:
+      POSTGRES_NONROOT_USER: postgres
+      POSTGRES_NONROOT_DB: test
+      POSTGRES_NONROOT_PASSWORD: postgres
+    commands:
+      - cd /drone/src/backend
+      - go test -v
 
 services:
-- name: postgres
-  image: postgres
-  environment:
-    POSTGRES_USER: postgres
-    POSTGRES_DB: test
-    POSTGRES_PASSWORD: postgres
-- name: redis
-  image: redis
+  - name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: postgres
+  - name: redis
+    image: redis
 
 volumes:
-- name: deps
-  temp: {}
----
-kind: pipeline
-type: docker
-name: build and publish latest
-
-platform:
-  os: linux
-  arch: amd64
-
-depends_on:
-- build
-- test
-
-trigger:
-  event: [ push, pull_request ]
-  branch:
-    exclude: [ master ]
-
-steps:
-- name: publish
-  image: gordonpn/docker-buildx-drone
-  environment:
-    DOCKER_TOKEN:
-      from_secret: DOCKER_TOKEN
-  volumes:
-  - name: dockersock
-    path: /var/run/docker.sock
-  commands:
-  - /drone/src/.docker/scripts/build.sh
-
-volumes:
-- name: dockersock
-  host:
-    path: /var/run/docker.sock
----
-kind: pipeline
-type: docker
-name: build and publish stable
-
-platform:
-  os: linux
-  arch: amd64
-
-depends_on:
-- build
-- test
-
-trigger:
-  event: [ push, pull_request ]
-  branch: [ master ]
-
-steps:
-- name: publish
-  image: gordonpn/docker-buildx-drone
-  environment:
-    DOCKER_TOKEN:
-      from_secret: DOCKER_TOKEN
-    DOCKER_TAG: stable
-  volumes:
-  - name: dockersock
-    path: /var/run/docker.sock
-  commands:
-  - /drone/src/.docker/scripts/build.sh
-
-volumes:
-- name: dockersock
-  host:
-    path: /var/run/docker.sock
+  - name: deps
+    temp: {}
 ---
 kind: pipeline
 type: docker
 name: security
 
 trigger:
-  event: [ push, pull_request ]
-  branch: [ develop ]
-
-depends_on:
-- build and publish latest
+  event: [push, pull_request]
+  branch: [develop]
 
 steps:
-- name: golangci-lint
-  image: golangci/golangci-lint
-  failure: ignore
-  commands:
-    - cd /drone/src/scraper
-    - go get
-    - golangci-lint run -E gosec ./...
-    - cd /drone/src/mailer
-    - go get
-    - golangci-lint run -E gosec ./...
-    - cd /drone/src/backend
-    - go get
-    - golangci-lint run -E gosec ./...
-    - cd /drone/src/notifier
-    - go get
-    - golangci-lint run -E gosec ./...
-- name: trivy scan
-  image: docker
-  failure: ignore
-  environment:
-    GITHUB_TOKEN:
-      from_secret: GITHUB_TOKEN
-  commands:
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL repo https://github.com/gordonpn/hot-flag-deals
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-backend
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-frontend
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-mailer
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-notifier
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-proxy
-    - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL gordonpn/hotdeals-scraper
-  volumes:
-    - name: dockersock
-      path: /var/run/docker.sock
-- name: snyk scan
-  image: gordonpn/snyk-cli-drone
-  failure: ignore
-  environment:
-    SNYK_TOKEN:
-      from_secret: SNYK_TOKEN
-  volumes:
-  - name: dockersock
-    path: /var/run/docker.sock
-  commands:
-  - snyk test --severity-threshold=high https://github.com/gordonpn/hot-flag-deals
-  - snyk test --docker gordonpn/hotdeals-backend:latest --file=Dockerfile --exclude-base-image-vulns
-  - snyk test --docker gordonpn/hotdeals-frontend:latest --file=Dockerfile --exclude-base-image-vulns
-  - snyk test --docker gordonpn/hotdeals-mailer:latest --file=Dockerfile --exclude-base-image-vulns
-  - snyk test --docker gordonpn/hotdeals-notifier:latest --file=Dockerfile --exclude-base-image-vulns
-  - snyk test --docker gordonpn/hotdeals-proxy:latest --file=Dockerfile --exclude-base-image-vulns
-  - snyk test --docker gordonpn/hotdeals-scraper:latest --file=Dockerfile --exclude-base-image-vulns
+  - name: golangci-lint
+    image: golangci/golangci-lint
+    failure: ignore
+    commands:
+      - cd /drone/src/scraper
+      - go get
+      - golangci-lint run -E gosec ./...
+      - cd /drone/src/mailer
+      - go get
+      - golangci-lint run -E gosec ./...
+      - cd /drone/src/backend
+      - go get
+      - golangci-lint run -E gosec ./...
+      - cd /drone/src/notifier
+      - go get
+      - golangci-lint run -E gosec ./...
+  - name: trivy scan
+    image: docker
+    failure: ignore
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
+    commands:
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL repo https://github.com/gordonpn/hot-flag-deals
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL ghcr.io/gordonpn/hotdeals-backend
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL ghcr.io/gordonpn/hotdeals-frontend
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL ghcr.io/gordonpn/hotdeals-mailer
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL ghcr.io/gordonpn/hotdeals-notifier
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL ghcr.io/gordonpn/hotdeals-proxy
+      - docker run aquasec/trivy --ignore-unfixed --no-progress --exit-code 1 --severity CRITICAL ghcr.io/gordonpn/hotdeals-scraper
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+  - name: snyk scan
+    image: gordonpn/snyk-cli-drone
+    failure: ignore
+    environment:
+      SNYK_TOKEN:
+        from_secret: SNYK_TOKEN
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - snyk test --severity-threshold=high https://github.com/gordonpn/hot-flag-deals
+      - snyk test --docker ghcr.io/gordonpn/hotdeals-backend:latest --file=Dockerfile --exclude-base-image-vulns
+      - snyk test --docker ghcr.io/gordonpn/hotdeals-frontend:latest --file=Dockerfile --exclude-base-image-vulns
+      - snyk test --docker ghcr.io/gordonpn/hotdeals-mailer:latest --file=Dockerfile --exclude-base-image-vulns
+      - snyk test --docker ghcr.io/gordonpn/hotdeals-notifier:latest --file=Dockerfile --exclude-base-image-vulns
+      - snyk test --docker ghcr.io/gordonpn/hotdeals-proxy:latest --file=Dockerfile --exclude-base-image-vulns
+      - snyk test --docker ghcr.io/gordonpn/hotdeals-scraper:latest --file=Dockerfile --exclude-base-image-vulns
 
 volumes:
-- name: dockersock
-  host:
-    path: /var/run/docker.sock
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 ---
 kind: pipeline
 type: docker
 name: deploy
 
 trigger:
-  event: [ push ]
-  branch: [ master ]
-
-depends_on:
-  - build and publish stable
+  event:
+    - promote
+  target:
+    - production
 
 steps:
-- name: deploy prod
-  image: docker/compose:1.25.5
-  environment:
-    TZ: America/Montreal
-    MAILER_HC_UUID:
-      from_secret: MAILER_HC_UUID
-    POSTGRES_DB:
-      from_secret: POSTGRES_DB
-    POSTGRES_NONROOT_DB:
-      from_secret: POSTGRES_NONROOT_DB
-    POSTGRES_NONROOT_PASSWORD:
-      from_secret: POSTGRES_NONROOT_PASSWORD
-    POSTGRES_NONROOT_USER:
-      from_secret: POSTGRES_NONROOT_USER
-    POSTGRES_PASSWORD:
-      from_secret: POSTGRES_PASSWORD
-    POSTGRES_USER:
-      from_secret: POSTGRES_USER
-    SCRAPER_HC_UUID:
-      from_secret: SCRAPER_HC_UUID
-    NOTIFIER_HC_UUID:
-      from_secret: NOTIFIER_HC_UUID
-    SENDGRID_API_KEY:
-      from_secret: SENDGRID_API_KEY
-    SENDGRID_TEMPLATE:
-      from_secret: SENDGRID_TEMPLATE
-    SENDGRID_TEMPLATE_CONFIRM:
-      from_secret: SENDGRID_TEMPLATE_CONFIRM
-    SLACK_NOTIFIER_HOOK:
-      from_secret: SLACK_NOTIFIER_HOOK
-  volumes:
-  - name: dockersock
-    path: /var/run/docker.sock
-  commands:
-  - /drone/src/.docker/scripts/deploy_prod.sh
+  - name: deploy prod
+    image: docker/compose:1.25.5
+    environment:
+      TZ: America/Montreal
+      MAILER_HC_UUID:
+        from_secret: MAILER_HC_UUID
+      POSTGRES_DB:
+        from_secret: POSTGRES_DB
+      POSTGRES_NONROOT_DB:
+        from_secret: POSTGRES_NONROOT_DB
+      POSTGRES_NONROOT_PASSWORD:
+        from_secret: POSTGRES_NONROOT_PASSWORD
+      POSTGRES_NONROOT_USER:
+        from_secret: POSTGRES_NONROOT_USER
+      POSTGRES_PASSWORD:
+        from_secret: POSTGRES_PASSWORD
+      POSTGRES_USER:
+        from_secret: POSTGRES_USER
+      SCRAPER_HC_UUID:
+        from_secret: SCRAPER_HC_UUID
+      NOTIFIER_HC_UUID:
+        from_secret: NOTIFIER_HC_UUID
+      SENDGRID_API_KEY:
+        from_secret: SENDGRID_API_KEY
+      SENDGRID_TEMPLATE:
+        from_secret: SENDGRID_TEMPLATE
+      SENDGRID_TEMPLATE_CONFIRM:
+        from_secret: SENDGRID_TEMPLATE_CONFIRM
+      SLACK_NOTIFIER_HOOK:
+        from_secret: SLACK_NOTIFIER_HOOK
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - /drone/src/.docker/scripts/deploy_prod.sh
 
 volumes:
-- name: dockersock
-  host:
-    path: /var/run/docker.sock
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock

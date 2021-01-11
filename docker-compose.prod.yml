@@ -51,7 +51,7 @@ services:
 
   scraper:
     container_name: hotdeals_scraper
-    image: gordonpn/hotdeals-scraper:stable
+    image: ghcr.io/gordonpn/hotdeals-scraper:stable
     networks:
       - hotdeals-network
     restart: unless-stopped
@@ -73,7 +73,7 @@ services:
   mailer:
     container_name: hotdeals_mailer
     restart: unless-stopped
-    image: gordonpn/hotdeals-mailer:stable
+    image: ghcr.io/gordonpn/hotdeals-mailer:stable
     networks:
       - hotdeals-network
     deploy:
@@ -94,7 +94,7 @@ services:
   notifier:
     container_name: hotdeals_notifier
     restart: unless-stopped
-    image: gordonpn/hotdeals-notifier:stable
+    image: ghcr.io/gordonpn/hotdeals-notifier:stable
     networks:
       - hotdeals-network
     deploy:
@@ -114,7 +114,7 @@ services:
 
   backend:
     container_name: hotdeals_backend
-    image: gordonpn/hotdeals-backend:stable
+    image: ghcr.io/gordonpn/hotdeals-backend:stable
     networks:
       - hotdeals-network
     expose:
@@ -143,7 +143,7 @@ services:
 
   frontend:
     container_name: hotdeals_frontend
-    image: gordonpn/hotdeals-frontend:stable
+    image: ghcr.io/gordonpn/hotdeals-frontend:stable
     environment:
       - NODE_ENV=production
     networks:
@@ -176,7 +176,7 @@ services:
 
   proxy:
     container_name: hotdeals_proxy
-    image: gordonpn/hotdeals-proxy:stable
+    image: ghcr.io/gordonpn/hotdeals-proxy:stable
     networks:
       - traefik-public
       - hotdeals-network

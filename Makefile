@@ -27,4 +27,3 @@ clean:
 
 pg:
 	docker exec -it hotdeals_postgres-dev sh
-
