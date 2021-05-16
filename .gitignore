@@ -267,3 +267,4 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/java,react,linux,macos,windows,java-web,webstorm+all,intellij+all,visualstudiocode
 *.env
 **/database-data
+.vscode/settings.json
